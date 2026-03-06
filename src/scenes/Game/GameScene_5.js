@@ -185,13 +185,13 @@ export class GameScene_5 extends BaseGameScene {
             card.isFlipped = false;
             card.isMatched = false;
 
-            // cardBack.on('pointerover', () => {
-            //     cardBack.setTexture('game3_card_select');
-            // });
+            cardBack.on('pointerover', () => {
+                cardBack.setScale(1.05);
+            });
 
-            // cardBack.on('pointerout', () => {
-            //     cardBack.setTexture('game3_card');
-            // });
+            cardBack.on('pointerout', () => {
+                cardBack.setScale(1);
+            });
 
             // Add click handler
             cardBack.on('pointerdown', () => this.onCardClick(card));
@@ -349,6 +349,7 @@ export class GameScene_5 extends BaseGameScene {
                 this.isSetMode = true;
                 this.modePanel.destroy();
                 this.resetForNewRound();
+                this.startGame();
             }
         );
         this.modePanel.add(normalBtn);
@@ -360,6 +361,7 @@ export class GameScene_5 extends BaseGameScene {
                 this.isSetMode = true;
                 this.modePanel.destroy();
                 this.resetForNewRound();
+                this.startGame();
             }
         );
         this.modePanel.add(hardBtn);
