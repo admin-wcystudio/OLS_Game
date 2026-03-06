@@ -21,6 +21,7 @@ export class GameScene_5 extends BaseGameScene {
         this.load.image('game5_normal_button_click', `${path}game5_normal_button_select.png`);
         this.load.image('game5_hard_button', `${path}game5_hard_button.png`);
         this.load.image('game5_hard_button_click', `${path}game5_hard_button_select.png`);
+        this.load.image('game5_mode_panel', `${path}game5_hardnormal_box.png`);
 
 
         //normal version
@@ -49,47 +50,83 @@ export class GameScene_5 extends BaseGameScene {
         const centerY = this.cameras.main.height / 2 + 50;
 
         this.isNormalMode = true;
+        this.isSetMode = false;
         this.isChecked = false;
 
         this.cards = [];
         this.flippedCards = [];
         this.matchedPairs = 0;
-        if (this.isNormalMode) {
-            // Set 14 fixed card spawn positions (2 rows of 7)
-            this.spawnCardPositions = [
-                { x: centerX - 600, y: centerY - 150 },
-                { x: centerX - 400, y: centerY - 150 },
-                { x: centerX - 200, y: centerY - 150 },
-                { x: centerX, y: centerY - 150 },
-                { x: centerX + 200, y: centerY - 150 },
-                { x: centerX + 400, y: centerY - 150 },
-                { x: centerX + 600, y: centerY - 150 },
-                { x: centerX - 600, y: centerY + 150 },
-                { x: centerX - 400, y: centerY + 150 },
-                { x: centerX - 200, y: centerY + 150 },
-                { x: centerX, y: centerY + 150 },
-                { x: centerX + 200, y: centerY + 150 },
-                { x: centerX + 400, y: centerY + 150 },
-                { x: centerX + 600, y: centerY + 150 }
-            ];
+        // Normal mode: 7 pairs = 14 cards (2 rows of 7)
+        this.spawnCardPositions_normal = [
+            { x: centerX - 600, y: centerY - 150 },
+            { x: centerX - 400, y: centerY - 150 },
+            { x: centerX - 200, y: centerY - 150 },
+            { x: centerX, y: centerY - 150 },
+            { x: centerX + 200, y: centerY - 150 },
+            { x: centerX + 400, y: centerY - 150 },
+            { x: centerX + 600, y: centerY - 150 },
+            { x: centerX - 600, y: centerY + 150 },
+            { x: centerX - 400, y: centerY + 150 },
+            { x: centerX - 200, y: centerY + 150 },
+            { x: centerX, y: centerY + 150 },
+            { x: centerX + 200, y: centerY + 150 },
+            { x: centerX + 400, y: centerY + 150 },
+            { x: centerX + 600, y: centerY + 150 }
+        ];
+        this.cardTypes_normal = [
+            'game5_normalcard1_img', 'game5_normalcard1_text',
+            'game5_normalcard2_img', 'game5_normalcard2_text',
+            'game5_normalcard3_img', 'game5_normalcard3_text',
+            'game5_normalcard4_img', 'game5_normalcard4_text',
+            'game5_normalcard5_img', 'game5_normalcard5_text',
+            'game5_normalcard6_img', 'game5_normalcard6_text',
+            'game5_normalcard7_img', 'game5_normalcard7_text'
+        ];
 
-            // Card pairs data (7 pairs = 14 cards)
-            this.cardTypes_normal = [
-                'game5_normalcard1_img', 'game5_normalcard1_text',
-                'game5_normalcard2_img', 'game5_normalcard2_text',
-                'game5_normalcard3_img', 'game5_normalcard3_text',
-                'game5_normalcard4_img', 'game5_normalcard4_text',
-                'game5_normalcard5_img', 'game5_normalcard5_text',
-                'game5_normalcard6_img', 'game5_normalcard6_text',
-                'game5_normalcard7_img', 'game5_normalcard7_text'
-            ];
-
-
-
-        }
+        // Hard mode: 12 pairs = 24 cards (4 rows of 6, 150px row spacing)
+        this.spawnCardPositions_hard = [
+            { x: centerX - 625, y: centerY - 195 },
+            { x: centerX - 375, y: centerY - 195 },
+            { x: centerX - 125, y: centerY - 195 },
+            { x: centerX + 125, y: centerY - 195 },
+            { x: centerX + 375, y: centerY - 195 },
+            { x: centerX + 625, y: centerY - 195 },
+            { x: centerX - 625, y: centerY - 45 },
+            { x: centerX - 375, y: centerY - 45 },
+            { x: centerX - 125, y: centerY - 45 },
+            { x: centerX + 125, y: centerY - 45 },
+            { x: centerX + 375, y: centerY - 45 },
+            { x: centerX + 625, y: centerY - 45 },
+            { x: centerX - 625, y: centerY + 105 },
+            { x: centerX - 375, y: centerY + 105 },
+            { x: centerX - 125, y: centerY + 105 },
+            { x: centerX + 125, y: centerY + 105 },
+            { x: centerX + 375, y: centerY + 105 },
+            { x: centerX + 625, y: centerY + 105 },
+            { x: centerX - 625, y: centerY + 255 },
+            { x: centerX - 375, y: centerY + 255 },
+            { x: centerX - 125, y: centerY + 255 },
+            { x: centerX + 125, y: centerY + 255 },
+            { x: centerX + 375, y: centerY + 255 },
+            { x: centerX + 625, y: centerY + 255 }
+        ];
+        this.cardTypes_hard = [
+            'game5_hardcard1_img', 'game5_hardcard1_text',
+            'game5_hardcard2_img', 'game5_hardcard2_text',
+            'game5_hardcard3_img', 'game5_hardcard3_text',
+            'game5_hardcard4_img', 'game5_hardcard4_text',
+            'game5_hardcard5_img', 'game5_hardcard5_text',
+            'game5_hardcard6_img', 'game5_hardcard6_text',
+            'game5_hardcard7_img', 'game5_hardcard7_text',
+            'game5_hardcard8_img', 'game5_hardcard8_text',
+            'game5_hardcard9_img', 'game5_hardcard9_text',
+            'game5_hardcard10_img', 'game5_hardcard10_text',
+            'game5_hardcard11_img', 'game5_hardcard11_text',
+            'game5_hardcard12_img', 'game5_hardcard12_text'
+        ];
 
         // Now call initGame which will call setupGameObjects
-        this.initGame('game5_bg', 'game5_description', false, false, {
+        this.initGame('game5_bg', 'game5_description', true, false, {
             targetRounds: 1,
             roundPerSeconds: 120,
             isAllowRoundFail: false,
@@ -98,13 +135,26 @@ export class GameScene_5 extends BaseGameScene {
         });
     }
 
+    _handleEntryFlow() {
+        this.gameUI.descriptionPanel?.setCloseCallBack(() => {
+            this.showChooseModePanel();
+        });
+    }
 
     setupGameObjects() {
+
+        if (!this.isSetMode) return;
+        // prevent multiple setup when switching modes
+        const cardTypes = this.isNormalMode ? this.cardTypes_normal : this.cardTypes_hard;
+        const positions = this.isNormalMode ? this.spawnCardPositions_normal : this.spawnCardPositions_hard;
+        const cardBackKey = this.isNormalMode ? 'game5_normalcard_back' : 'game5_hardcard_back';
+        this.totalPairs = this.isNormalMode ? 7 : 12;
+
         // Shuffle card types
-        const shuffledTypes = Phaser.Utils.Array.Shuffle([...this.cardTypes_normal]);
+        const shuffledTypes = Phaser.Utils.Array.Shuffle([...cardTypes]);
 
         // Shuffle positions
-        const shuffledPositions = Phaser.Utils.Array.Shuffle([...this.spawnCardPositions]);
+        const shuffledPositions = Phaser.Utils.Array.Shuffle([...positions]);
 
         console.log('Creating cards at positions:', shuffledPositions);
 
@@ -116,7 +166,7 @@ export class GameScene_5 extends BaseGameScene {
             const card = this.add.container(pos.x, pos.y).setDepth(500);
 
             // Card back (initially visible)
-            const cardBack = this.add.image(0, 0, 'game5_normalcard_back')
+            const cardBack = this.add.image(0, 0, cardBackKey)
                 .setInteractive({ useHandCursor: true })
                 .setVisible(true)
                 .setScale(1);
@@ -210,10 +260,10 @@ export class GameScene_5 extends BaseGameScene {
 
                 // Increment matched pairs count
                 this.matchedPairs++;
-                console.log(`Matched pairs: ${this.matchedPairs}/7`);
+                console.log(`Matched pairs: ${this.matchedPairs}/${this.totalPairs}`);
 
-                // Check if all 7 pairs matched - WIN!
-                if (this.matchedPairs === 7) {
+                // Check if all pairs matched - WIN!
+                if (this.matchedPairs === this.totalPairs) {
                     console.log('All pairs matched! You win!');
                     this.time.delayedCall(500, () => {
                         this.onRoundWin();
@@ -284,5 +334,34 @@ export class GameScene_5 extends BaseGameScene {
         objectPanel.setCloseCallBack(() => GameManager.backToMainStreet(this));
     }
 
+    showChooseModePanel() {
+        const { width, height } = this.cameras.main;
 
+        this.modePanel = this.add.container(width / 2, height / 2).setDepth(2000);
+
+        const bg = this.add.image(0, 0, 'game5_mode_panel');
+        this.modePanel.add(bg);
+
+        const normalBtn = new CustomButton(this, 0, 0,
+            'game5_normal_button', 'game5_normal_button_click',
+            () => {
+                this.isNormalMode = true;
+                this.isSetMode = true;
+                this.modePanel.destroy();
+                this.resetForNewRound();
+            }
+        );
+        this.modePanel.add(normalBtn);
+
+        const hardBtn = new CustomButton(this, 0, 200,
+            'game5_hard_button', 'game5_hard_button_click',
+            () => {
+                this.isNormalMode = false;
+                this.isSetMode = true;
+                this.modePanel.destroy();
+                this.resetForNewRound();
+            }
+        );
+        this.modePanel.add(hardBtn);
+    }
 }
