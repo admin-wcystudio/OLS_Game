@@ -47,7 +47,7 @@ export class GameScene_5 extends BaseGameScene {
 
     create() {
         const centerX = this.cameras.main.width / 2;
-        const centerY = this.cameras.main.height / 2 + 50;
+        const centerY = this.cameras.main.height / 2 + 100;
 
         this.isNormalMode = true;
         this.isSetMode = false;
@@ -83,32 +83,32 @@ export class GameScene_5 extends BaseGameScene {
             'game5_normalcard7_img', 'game5_normalcard7_text'
         ];
 
-        // Hard mode: 12 pairs = 24 cards (4 rows of 6, 150px row spacing)
+        // Hard mode: 12 pairs = 24 cards (3 rows of 8, 200px col / 230px row spacing)
         this.spawnCardPositions_hard = [
-            { x: centerX - 625, y: centerY - 195 },
-            { x: centerX - 375, y: centerY - 195 },
-            { x: centerX - 125, y: centerY - 195 },
-            { x: centerX + 125, y: centerY - 195 },
-            { x: centerX + 375, y: centerY - 195 },
-            { x: centerX + 625, y: centerY - 195 },
-            { x: centerX - 625, y: centerY - 45 },
-            { x: centerX - 375, y: centerY - 45 },
-            { x: centerX - 125, y: centerY - 45 },
-            { x: centerX + 125, y: centerY - 45 },
-            { x: centerX + 375, y: centerY - 45 },
-            { x: centerX + 625, y: centerY - 45 },
-            { x: centerX - 625, y: centerY + 105 },
-            { x: centerX - 375, y: centerY + 105 },
-            { x: centerX - 125, y: centerY + 105 },
-            { x: centerX + 125, y: centerY + 105 },
-            { x: centerX + 375, y: centerY + 105 },
-            { x: centerX + 625, y: centerY + 105 },
-            { x: centerX - 625, y: centerY + 255 },
-            { x: centerX - 375, y: centerY + 255 },
-            { x: centerX - 125, y: centerY + 255 },
-            { x: centerX + 125, y: centerY + 255 },
-            { x: centerX + 375, y: centerY + 255 },
-            { x: centerX + 625, y: centerY + 255 }
+            { x: centerX - 700, y: centerY - 230 },
+            { x: centerX - 500, y: centerY - 230 },
+            { x: centerX - 300, y: centerY - 230 },
+            { x: centerX - 100, y: centerY - 230 },
+            { x: centerX + 100, y: centerY - 230 },
+            { x: centerX + 300, y: centerY - 230 },
+            { x: centerX + 500, y: centerY - 230 },
+            { x: centerX + 700, y: centerY - 230 },
+            { x: centerX - 700, y: centerY },
+            { x: centerX - 500, y: centerY },
+            { x: centerX - 300, y: centerY },
+            { x: centerX - 100, y: centerY },
+            { x: centerX + 100, y: centerY },
+            { x: centerX + 300, y: centerY },
+            { x: centerX + 500, y: centerY },
+            { x: centerX + 700, y: centerY },
+            { x: centerX - 700, y: centerY + 230 },
+            { x: centerX - 500, y: centerY + 230 },
+            { x: centerX - 300, y: centerY + 230 },
+            { x: centerX - 100, y: centerY + 230 },
+            { x: centerX + 100, y: centerY + 230 },
+            { x: centerX + 300, y: centerY + 230 },
+            { x: centerX + 500, y: centerY + 230 },
+            { x: centerX + 700, y: centerY + 230 }
         ];
         this.cardTypes_hard = [
             'game5_hardcard1_img', 'game5_hardcard1_text',
@@ -315,8 +315,14 @@ export class GameScene_5 extends BaseGameScene {
     }
 
     showWin() {
-        this.winPreview = this.add.image(this.centerX, this.centerY + 100, 'game3_preview').setDepth(1000)
-            .setInteractive({ useHandCursor: true }).setScale(1.3)
+        if (this.isNormalMode) {
+            this.winPreview = this.add.image(this.centerX, this.centerY + 100, 'game5_normal_success_preview').setDepth(1000)
+                .setInteractive({ useHandCursor: true }).setScale(1.3)
+        } else {
+            this.winPreview = this.add.image(this.centerX, this.centerY + 100, 'game5_hard_success_preview').setDepth(1000)
+                .setInteractive({ useHandCursor: true }).setScale(1.3)
+        }
+        this.winPreview.setInteractive({ useHandCursor: true }).setScale(1.3)
             .on('pointerdown', () => {
                 this.winPreview.destroy();
                 this.showObjectPanel();
