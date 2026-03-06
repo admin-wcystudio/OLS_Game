@@ -128,14 +128,12 @@ export class GameScene_5 extends BaseGameScene {
         // Now call initGame which will call setupGameObjects
         this.initGame('game5_bg', 'game5_description', true, false, {
             targetRounds: 1,
-            roundPerSeconds: 120,
+            roundPerSeconds: 10,
             isAllowRoundFail: false,
             isContinuousTimer: true,
             sceneIndex: 5
         });
-    }
 
-    _handleEntryFlow() {
         this.gameUI.descriptionPanel?.setCloseCallBack(() => {
             this.showChooseModePanel();
         });
@@ -337,7 +335,20 @@ export class GameScene_5 extends BaseGameScene {
         ]);
         objectPanel.setDepth(1000);
         objectPanel.show();
-        objectPanel.setCloseCallBack(() => GameManager.backToMainStreet(this));
+        //objectPanel.setCloseCallBack(() => GameManager.backToMainStreet(this));
+    }
+
+    showFailPanel() {
+        const popupPanel = new CustomFailPanel(this, 960, 540, () => {
+            popupPanel.destroy();
+            this.isSetMode = false;
+            this.restartGame();
+            // restartGame() sets descriptionPanel close → startGame(); override it to show mode panel instead
+            this.gameUI.descriptionPanel?.setCloseCallBack(() => this.showChooseModePanel());
+        }, () => {
+            //GameManager.backToMainStreet(this);
+        });
+        popupPanel.setDepth(1000);
     }
 
     showChooseModePanel() {
