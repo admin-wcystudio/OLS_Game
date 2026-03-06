@@ -12,153 +12,277 @@ export class GameScene_5 extends BaseGameScene {
     preload() {
 
         const path = 'assets/images/Game_5/';
-        this.load.video('boy_bg1', path + 'game5_boy_bg1.webm');
-        this.load.video('boy_bg2', path + 'game5_boy_bg2.webm');
-        this.load.video('girl_bg1', path + 'game5_girl_bg1.webm');
-        this.load.video('girl_bg2', path + 'game5_girl_bg2.webm');
-
-        // NPC dialogue boxes (in ascending order)
-        this.load.image('game5_npc_box1', `${path}game5_npc_box1.png`);
-        this.load.image('game5_npc_box3', `${path}game5_npc_box4.png`);
-        this.load.image('game5_npc_box4', `${path}game5_npc_box6.png`);
-        this.load.image('game5_npc_box5', `${path}game5_npc_box8.png`);
-
-        this.load.image('game5_npc_box_win', `${path}game5_npc_box10.png`);
-        this.load.image('game5_npc_box_tryagain', `${path}game5_npc_box11.png`);
-        this.load.image('game5_npc_box_intro', `${path}game5_npc_box3.png`);
-
-        this.load.image('game5_boy_npc_box1', `${path}game5_npc_boy_box4.png`);
-        this.load.image('game5_boy_npc_box2', `${path}game5_npc_boy_box5.png`);
-        this.load.image('game5_boy_npc_box3', `${path}game5_npc_boy_box7.png`);
-        this.load.image('game5_boy_npc_box4', `${path}game5_npc_boy_box9.png`);
-
-        this.load.image('game5_girl_npc_box1', `${path}game5_npc_girl_box2.png`);
-        this.load.image('game5_girl_npc_box2', `${path}game5_npc_girl_box5.png`);
-        this.load.image('game5_girl_npc_box3', `${path}game5_npc_girl_box7.png`);
-        this.load.image('game5_girl_npc_box4', `${path}game5_npc_girl_box9.png`);
 
 
-        // UI buttons
-        this.load.image('game5_confirm_button', `${path}game5_confirm_button.png`);
-        this.load.image('game5_confirm_button_select', `${path}game5_confirm_button_select.png`);
+        this.load.image('game5_npc_box_win', `${path}game5_npc_box2.png`);
+        this.load.image('game5_npc_box_tryagain', `${path}game5_npc_box3.png`);
 
-        for (let i = 1; i <= 3; i++) {
-            this.load.image(`game5_q${i}`, `${path}game5_q${i}.png`);
-            this.load.image(`game5_q${i}_a_button`, `${path}game5_q${i}_a_button.png`);
-            this.load.image(`game5_q${i}_b_button`, `${path}game5_q${i}_b_button.png`);
-            this.load.image(`game5_q${i}_c_button`, `${path}game5_q${i}_c_button.png`);
-            this.load.image(`game5_q${i}_d_button`, `${path}game5_q${i}_d_button.png`);
-            this.load.image(`game5_q${i}_a_button_select`, `${path}game5_q${i}_a_button_select.png`);
-            this.load.image(`game5_q${i}_b_button_select`, `${path}game5_q${i}_b_button_select.png`);
-            this.load.image(`game5_q${i}_c_button_select`, `${path}game5_q${i}_c_button_select.png`);
-            this.load.image(`game5_q${i}_d_button_select`, `${path}game5_q${i}_d_button_select.png`);
+        this.load.image('game5_normal_button', `${path}game5_normal_button.png`);
+        this.load.image('game5_normal_button_click', `${path}game5_normal_button_select.png`);
+        this.load.image('game5_hard_button', `${path}game5_hard_button.png`);
+        this.load.image('game5_hard_button_click', `${path}game5_hard_button_select.png`);
+
+
+        //normal version
+        const normalPath = 'assets/images/Game_5/normalversion/';
+        this.load.image('game5_normal_success_preview', `${normalPath}game5_normal_success_preview.png`);
+        this.load.image('game5_normalcard_back', `${normalPath}game5_normalcard_cover.png`);
+
+        for (let i = 1; i <= 7; i++) {
+            this.load.image(`game5_normalcard${i}_img`, `${normalPath}game5_normalcard${i}_large_img.png`);
+            this.load.image(`game5_normalcard${i}_text`, `${normalPath}game5_normalcard${i}_large_text.png`);
         }
+
+        const hardPath = 'assets/images/Game_5/hardversion/';
+        this.load.image('game5_hard_success_preview', `${hardPath}game5_hard_success_preview.png`);
+        this.load.image('game5_hardcard_back', `${hardPath}game5_hardcard_cover.png`);
+
+        for (let i = 1; i <= 12; i++) {
+            this.load.image(`game5_hardcard${i}_img`, `${hardPath}game5_hardcard${i}_large_img.png`);
+            this.load.image(`game5_hardcard${i}_text`, `${hardPath}game5_hardcard${i}_large_text.png`);
+        }
+
     }
 
     create() {
-        const gender = localStorage.getItem('player') ? JSON.parse(localStorage.getItem('player')).gender : 'F';
+        const centerX = this.cameras.main.width / 2;
+        const centerY = this.cameras.main.height / 2 + 50;
 
-        this.genderKey = gender === 'M' ? 'boy' : 'girl';
-        const genderKey = this.genderKey;
+        this.isNormalMode = true;
+        this.isChecked = false;
+
+        this.cards = [];
+        this.flippedCards = [];
+        this.matchedPairs = 0;
+        if (this.isNormalMode) {
+            // Set 14 fixed card spawn positions (2 rows of 7)
+            this.spawnCardPositions = [
+                { x: centerX - 600, y: centerY - 150 },
+                { x: centerX - 400, y: centerY - 150 },
+                { x: centerX - 200, y: centerY - 150 },
+                { x: centerX, y: centerY - 150 },
+                { x: centerX + 200, y: centerY - 150 },
+                { x: centerX + 400, y: centerY - 150 },
+                { x: centerX + 600, y: centerY - 150 },
+                { x: centerX - 600, y: centerY + 150 },
+                { x: centerX - 400, y: centerY + 150 },
+                { x: centerX - 200, y: centerY + 150 },
+                { x: centerX, y: centerY + 150 },
+                { x: centerX + 200, y: centerY + 150 },
+                { x: centerX + 400, y: centerY + 150 },
+                { x: centerX + 600, y: centerY + 150 }
+            ];
+
+            // Card pairs data (7 pairs = 14 cards)
+            this.cardTypes_normal = [
+                'game5_normalcard1_img', 'game5_normalcard1_text',
+                'game5_normalcard2_img', 'game5_normalcard2_text',
+                'game5_normalcard3_img', 'game5_normalcard3_text',
+                'game5_normalcard4_img', 'game5_normalcard4_text',
+                'game5_normalcard5_img', 'game5_normalcard5_text',
+                'game5_normalcard6_img', 'game5_normalcard6_text',
+                'game5_normalcard7_img', 'game5_normalcard7_text'
+            ];
 
 
-        // Create and play background video based on gender
-        this.bgVideo = this.add.video(960, 540, `${this.genderKey}_bg1`)
-            .setDepth(-1)
-            .setOrigin(0.5, 0.5);
 
-        this.bgVideo.play(true); // true = loop the video
+        }
 
-        // Pass null for bgKey since using video background
-        this.initGame(null, 'game5_description', false, false, {
-            targetRounds: 3,
-            roundPerSeconds: 60,
+        // Now call initGame which will call setupGameObjects
+        this.initGame('game5_bg', 'game5_description', false, false, {
+            targetRounds: 1,
+            roundPerSeconds: 120,
             isAllowRoundFail: false,
             isContinuousTimer: true,
             sceneIndex: 5
         });
     }
 
+
     setupGameObjects() {
-        if (this.questionPanel) {
-            this.questionPanel.destroy();
-            this.questionPanel = null;
-        }
+        // Shuffle card types
+        const shuffledTypes = Phaser.Utils.Array.Shuffle([...this.cardTypes_normal]);
 
-        const allQuestions = [
-            {
-                content: 'game5_q1',
-                options: ['game5_q1_a_button', 'game5_q1_b_button', 'game5_q1_c_button', 'game5_q1_d_button'],
-                answer: 0,
-                nextDialog: 'game5_npc_box3',
-                characterDialog: `game5_${this.genderKey}_npc_box2`
-            },
-            {
-                content: 'game5_q2',
-                options: ['game5_q2_a_button', 'game5_q2_b_button', 'game5_q2_c_button', 'game5_q2_d_button'],
-                answer: 3,
-                nextDialog: 'game5_npc_box4',
-                characterDialog: `game5_${this.genderKey}_npc_box3`
-            },
-            {
-                content: 'game5_q3',
-                options: ['game5_q3_a_button', 'game5_q3_b_button', 'game5_q3_c_button', 'game5_q3_d_button'],
-                answer: 1,
-                nextDialog: 'game5_npc_box5',
-                characterDialog: `game5_${this.genderKey}_npc_box4`
-            }
-        ]
+        // Shuffle positions
+        const shuffledPositions = Phaser.Utils.Array.Shuffle([...this.spawnCardPositions]);
 
-        this.questionPanel = new QuestionPanel(this, allQuestions, () => {
+        console.log('Creating cards at positions:', shuffledPositions);
+
+        // Create cards at random positions
+        shuffledTypes.forEach((cardType, index) => {
+            const pos = shuffledPositions[index];
+
+            // Create card container
+            const card = this.add.container(pos.x, pos.y).setDepth(500);
+
+            // Card back (initially visible)
+            const cardBack = this.add.image(0, 0, 'game5_normalcard_back')
+                .setInteractive({ useHandCursor: true })
+                .setVisible(true)
+                .setScale(1);
+
+            // Card front (hidden initially) - scale to match card back size
+            const cardFront = this.add.image(0, 0, cardType)
+                .setVisible(false)
+                .setScale(0.55);
+
+            card.add([cardBack, cardFront]);
+
+            // Store card data
+            card.cardType = cardType;
+            card.cardBack = cardBack;
+            card.cardFront = cardFront;
+            card.isFlipped = false;
+            card.isMatched = false;
+
+            // cardBack.on('pointerover', () => {
+            //     cardBack.setTexture('game3_card_select');
+            // });
+
+            // cardBack.on('pointerout', () => {
+            //     cardBack.setTexture('game3_card');
+            // });
+
+            // Add click handler
+            cardBack.on('pointerdown', () => this.onCardClick(card));
+
+            this.cards.push(card);
         });
-        this.questionPanel.setDepth(559).setVisible(false);
+
+        console.log(`Created ${this.cards.length} cards`);
     }
 
-    enableGameInteraction(enable) {
-        if (this.questionPanel) {
-            this.questionPanel.setVisible(enable);
+    onCardClick(card) {
+        if (!this.isGameActive || this.isChecking || card.isFlipped || card.isMatched) {
+            return;
         }
+
+        // Flip the card
+        this.flipCard(card, true);
+        this.flippedCards.push(card);
+
+        // Check if two cards are flipped
+        if (this.flippedCards.length === 2) {
+            this.isChecking = true;
+            this.checkMatch();
+        }
+    }
+
+    flipCard(card, faceUp) {
+        card.isFlipped = faceUp;
+        card.cardBack.setVisible(!faceUp);
+        card.cardFront.setVisible(faceUp);
+
+        // Optional: Add flip animation
+        this.tweens.add({
+            targets: card,
+            scaleX: faceUp ? 1 : 1,
+            duration: 150,
+            ease: 'Linear'
+        });
+    }
+
+    checkMatch() {
+        const [card1, card2] = this.flippedCards;
+
+        // Extract pair number (e.g., "game5_normalcard1_img" and "game5_normalcard1_text" are a match)
+        const type1 = card1.cardType.replace(/_(img|text)$/, '');
+        const type2 = card2.cardType.replace(/_(img|text)$/, '');
+
+        if (type1 === type2) {
+            // Match found!
+            this.time.delayedCall(500, () => {
+                card1.isMatched = true;
+                card2.isMatched = true;
+
+                // Make cards disappear with animation
+                this.tweens.add({
+                    targets: [card1, card2],
+                    alpha: 0,
+                    scale: 0.5,
+                    duration: 300,
+                    ease: 'Back.easeIn',
+                    onComplete: () => {
+                        card1.destroy();
+                        card2.destroy();
+                    }
+                });
+
+                // Increment matched pairs count
+                this.matchedPairs++;
+                console.log(`Matched pairs: ${this.matchedPairs}/7`);
+
+                // Check if all 7 pairs matched - WIN!
+                if (this.matchedPairs === 7) {
+                    console.log('All pairs matched! You win!');
+                    this.time.delayedCall(500, () => {
+                        this.onRoundWin();
+                    });
+                }
+
+                this.flippedCards = [];
+                this.isChecking = false;
+            });
+        } else {
+            // No match, flip back
+            this.time.delayedCall(1000, () => {
+                this.flipCard(card1, false);
+                this.flipCard(card2, false);
+                this.flippedCards = [];
+                this.isChecking = false;
+            });
+        }
+    }
+
+
+
+    enableGameInteraction(enabled) {
+        this.cards.forEach(card => {
+            // Skip if card is destroyed or matched
+            if (!card || card.isMatched || !card.cardBack) return;
+
+            if (enabled) {
+                card.cardBack.setInteractive();
+            } else {
+                card.cardBack.disableInteractive();
+            }
+        });
     }
 
     resetForNewRound() {
-        if (this.questionPanel) {
-            this.questionPanel.destroy();
+        // Destroy existing cards
+        if (this.cards) {
+            this.cards.forEach(card => card.destroy());
         }
 
-        this.bgVideo.destroy();
-        this.bgVideo = this.add.video(960, 540, `${this.genderKey}_bg1`)
-            .setDepth(-1)
-            .setOrigin(0.5, 0.5);
-        this.bgVideo.play(true);
+        this.cards = [];
+        this.flippedCards = [];
+        this.matchedPairs = 0;
+        this.isChecking = false;
 
-        this.setupGameObjects(); // 重新抽題並建立 Panel
-        this.questionPanel.setVisible(true);
+        // Recreate cards
+        this.setupGameObjects();
     }
 
     showWin() {
-        this.questionPanel.setVisible(false);
-        this.time.delayedCall(1500, () => {
-            GameManager.backToMainStreet(this);
-        });
+        this.winPreview = this.add.image(this.centerX, this.centerY + 100, 'game3_preview').setDepth(1000)
+            .setInteractive({ useHandCursor: true }).setScale(1.3)
+            .on('pointerdown', () => {
+                this.winPreview.destroy();
+                this.showObjectPanel();
+            });
+
     }
 
-    showLose(onComplete) {
-        // Stop and destroy the current video
-        if (this.bgVideo) {
-            this.bgVideo.stop();
-            this.bgVideo.destroy();
-        }
-
-        // Play the fail background video
-        this.bgVideo = this.add.video(960, 540, `${this.genderKey}_bg2`)
-            .setDepth(-1)
-            .setOrigin(0.5, 0.5);
-        this.bgVideo.play(true);
-
-        // Delay before showing fail panel to let the video play
-        this.time.delayedCall(3000, () => {
-            if (onComplete) onComplete();
-        });
+    showObjectPanel() {
+        const objectPanel = new CustomPanel(this, 960, 600, [
+            { content: 'game5_object_description1' },
+            { content: 'game5_object_description2' }
+        ]);
+        objectPanel.setDepth(1000);
+        objectPanel.show();
+        objectPanel.setCloseCallBack(() => GameManager.backToMainStreet(this));
     }
+
 
 }
