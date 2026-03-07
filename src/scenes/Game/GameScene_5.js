@@ -128,7 +128,7 @@ export class GameScene_5 extends BaseGameScene {
         // Now call initGame which will call setupGameObjects
         this.initGame('game5_bg', 'game5_description', true, false, {
             targetRounds: 1,
-            roundPerSeconds: 10,
+            roundPerSeconds: 120,
             isAllowRoundFail: false,
             isContinuousTimer: true,
             sceneIndex: 5
@@ -224,7 +224,8 @@ export class GameScene_5 extends BaseGameScene {
         // Optional: Add flip animation
         this.tweens.add({
             targets: card,
-            scaleX: faceUp ? 1 : 1,
+            scaleX: faceUp ? 0.8 : 1,
+            scaleY: faceUp ? 0.8 : 1,
             duration: 150,
             ease: 'Linear'
         });
