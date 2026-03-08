@@ -118,18 +118,30 @@ export class GameScene_5 extends BaseGameScene {
             { x: centerX + 700, y: centerY + 230 }
         ];
         this.cardTypes_hard = [
-            'game5_hardcard1_img', 'game5_hardcard1_text',
-            'game5_hardcard2_img', 'game5_hardcard2_text',
-            'game5_hardcard3_img', 'game5_hardcard3_text',
-            'game5_hardcard4_img', 'game5_hardcard4_text',
-            'game5_hardcard5_img', 'game5_hardcard5_text',
-            'game5_hardcard6_img', 'game5_hardcard6_text',
-            'game5_hardcard7_img', 'game5_hardcard7_text',
-            'game5_hardcard8_img', 'game5_hardcard8_text',
-            'game5_hardcard9_img', 'game5_hardcard9_text',
-            'game5_hardcard10_img', 'game5_hardcard10_text',
-            'game5_hardcard11_img', 'game5_hardcard11_text',
-            'game5_hardcard12_img', 'game5_hardcard12_text'
+            'game5_hardcard12_text', // position 1
+            'game5_hardcard9_img',   // position 2
+            'game5_hardcard8_img',   // position 3
+            'game5_hardcard12_img',  // position 4
+            'game5_hardcard2_img',   // position 5
+            'game5_hardcard6_text',  // position 6
+            'game5_hardcard9_text',  // position 7
+            'game5_hardcard7_text',  // position 8
+            'game5_hardcard11_img',  // position 9
+            'game5_hardcard1_img',   // position 10
+            'game5_hardcard10_text', // position 11
+            'game5_hardcard2_text',  // position 12
+            'game5_hardcard11_text', // position 13
+            'game5_hardcard5_img',   // position 14
+            'game5_hardcard3_text',  // position 15
+            'game5_hardcard4_text',  // position 16
+            'game5_hardcard5_text',  // position 17
+            'game5_hardcard8_text',  // position 18
+            'game5_hardcard6_img',   // position 19
+            'game5_hardcard1_text',  // position 20
+            'game5_hardcard4_img',   // position 21
+            'game5_hardcard7_img',   // position 22
+            'game5_hardcard3_img',   // position 23
+            'game5_hardcard10_img',  // position 24
         ];
 
         // Now call initGame which will call setupGameObjects
