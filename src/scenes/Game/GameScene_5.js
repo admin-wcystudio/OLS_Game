@@ -74,13 +74,20 @@ export class GameScene_5 extends BaseGameScene {
             { x: centerX + 600, y: centerY + 150 }
         ];
         this.cardTypes_normal = [
-            'game5_normalcard1_img', 'game5_normalcard1_text',
-            'game5_normalcard2_img', 'game5_normalcard2_text',
-            'game5_normalcard3_img', 'game5_normalcard3_text',
-            'game5_normalcard4_img', 'game5_normalcard4_text',
-            'game5_normalcard5_img', 'game5_normalcard5_text',
-            'game5_normalcard6_img', 'game5_normalcard6_text',
-            'game5_normalcard7_img', 'game5_normalcard7_text'
+            'game5_normalcard2_img',  // position 1
+            'game5_normalcard4_img',  // position 2
+            'game5_normalcard1_img',  // position 3
+            'game5_normalcard1_text', // position 4
+            'game5_normalcard6_img',  // position 5
+            'game5_normalcard4_text', // position 6
+            'game5_normalcard7_text', // position 7
+            'game5_normalcard5_text', // position 8
+            'game5_normalcard2_text', // position 9
+            'game5_normalcard7_img',  // position 10
+            'game5_normalcard3_text', // position 11
+            'game5_normalcard3_img',  // position 12
+            'game5_normalcard6_text', // position 13
+            'game5_normalcard5_img',  // position 14
         ];
 
         // Hard mode: 12 pairs = 24 cards (3 rows of 8, 200px col / 230px row spacing)
@@ -148,17 +155,9 @@ export class GameScene_5 extends BaseGameScene {
         const cardBackKey = this.isNormalMode ? 'game5_normalcard_back' : 'game5_hardcard_back';
         this.totalPairs = this.isNormalMode ? 7 : 12;
 
-        // Shuffle card types
-        const shuffledTypes = Phaser.Utils.Array.Shuffle([...cardTypes]);
-
-        // Shuffle positions
-        const shuffledPositions = Phaser.Utils.Array.Shuffle([...positions]);
-
-        console.log('Creating cards at positions:', shuffledPositions);
-
-        // Create cards at random positions
-        shuffledTypes.forEach((cardType, index) => {
-            const pos = shuffledPositions[index];
+        // Create cards at fixed positions
+        cardTypes.forEach((cardType, index) => {
+            const pos = positions[index];
 
             // Create card container
             const card = this.add.container(pos.x, pos.y).setDepth(500);
