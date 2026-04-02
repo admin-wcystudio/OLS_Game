@@ -80,32 +80,6 @@ export class MainStreetScene extends Phaser.Scene {
             this.load.image(`stage_object_game${i}_select`, `assets/images/MainStreet/NPCs/stage_object_game${i}_select.png`);
         }
 
-        //character bubbles
-
-        // Character bubbles for games 1 to 6
-
-        this.load.image('game1_girl_bubble', 'assets/images/Game_1/game1_npc_girl_box2.png');
-        this.load.image('game1_boy_bubble', 'assets/images/Game_1/game1_npc_box2.png');
-
-        this.load.image('game2_girl_bubble', 'assets/images/Game_2/game2_npc_girl_box2.png');
-        this.load.image('game2_boy_bubble', 'assets/images/Game_2/game2_npc_box2.png');
-
-        this.load.image('game3_girl_bubble', 'assets/images/Game_3/game3_npc_girl_box2.png');
-        this.load.image('game3_boy_bubble', 'assets/images/Game_3/game3_npc_box2.png');
-
-        this.load.image('game4_girl_bubble', 'assets/images/Game_4/game4_npc_girl_box2.png');
-        this.load.image('game4_boy_bubble', 'assets/images/Game_4/game4_npc_box2.png');
-
-        this.load.image('game5_girl_bubble', 'assets/images/Game_5/game5_npc_girl_box2.png');
-        this.load.image('game5_boy_bubble', 'assets/images/Game_5/game5_npc_box2.png');
-
-        this.load.image('game6_girl_bubble', 'assets/images/Game_6/game6_npc_girl_box2.png');
-        this.load.image('game6_boy_bubble', 'assets/images/Game_6/game6_npc_box2.png');
-
-        this.load.image('game7_girl_bubble', 'assets/images/Game_7/game7_npc_girl.png');
-        this.load.image('game7_boy_bubble', 'assets/images/Game_7/game7_npc_boy.png');
-
-
 
         // // Only load spritesheets for the selected gender
         let gender = 'M';
@@ -145,7 +119,7 @@ export class MainStreetScene extends Phaser.Scene {
 
         // // NPC spritesheets
         this.load.spritesheet('npc1', 'assets/images/MainStreet/NPCs/npc1.png',
-            { frameWidth: 195, frameHeight: 240 });
+            { frameWidth: 149, frameHeight: 178.5 });
 
     }
 
@@ -165,21 +139,25 @@ export class MainStreetScene extends Phaser.Scene {
         const genderKey = this.genderKey;
 
         const playerPos = localStorage.getItem('playerPosition')
-            ? JSON.parse(localStorage.getItem('playerPosition')) : { x: 600, y: 600 };
+            ? JSON.parse(localStorage.getItem('playerPosition')) : { x: 600, y: 280 };
         this.playerPos = playerPos;
 
 
         console.log(`Player gender: ${gender}, genderKey: ${genderKey}`);
 
-        const bgKeys = ['stage1', 'stage2', 'stage3'];
+        const bgKeys = ['stage1', 'stage2'];
+        const templeKeys = ['stage3'];
         let currentX = 0;
         //background
         bgKeys.forEach((key, index) => {
             const bg = this.add.image(currentX, 540, key).setOrigin(0, 0.5).setDepth(1);
             currentX += bg.width; // 累加寬度，讓下一張接在後面
         });
+        const temple = this.add.image(520, 180, 'stage3').setOrigin(0, 0.5).setDepth(10).setScale(0.85);
+
+
         // 設定相機邊界為總長度 8414px
-        this.cameras.main.setBounds(0, 0, 5500, 1080);
+        this.cameras.main.setBounds(0, 0, 2580, 1080);
 
         const introPage = [
             {
@@ -191,7 +169,7 @@ export class MainStreetScene extends Phaser.Scene {
         ]
 
         const ui = UIHelper.createGameCommonUI(this, null, introPage, 0);
-        ui.descriptionPanel.setVisible(true);
+        //ui.descriptionPanel.setVisible(true);
 
         // Check if intro has been seen in this session
         // const hasSeenIntro = sessionStorage.getItem('hasSeenMainStreetIntro');
@@ -238,7 +216,17 @@ export class MainStreetScene extends Phaser.Scene {
         // NPCs (trigger game)
         this.interactiveNpcs = [];
 
-        const n1 = NpcHelper.createNpc(this, 1, 850, 550, 1, 'npc1', npc1_bubbles, 6, 'npc1_anim');
+        const n1 = NpcHelper.createNpc(this, 1, 1900, 200, 1, 'npc1', 7, 'npc1_anim');
+
+        const n1_item = NpcHelper.createNpcItem(this, 1, 1300, 250, 1, 'stage_object_game1', 'stage_object_game1_select', 7);
+        const n2_item = NpcHelper.createNpcItem(this, 1, 2200, 350, 1, 'stage_object_game2', 'stage_object_game2_select', 7);
+        const n3_item = NpcHelper.createNpcItem(this, 1, width / 2 + 380, 1050, 1, 'stage_object_game3', 'stage_object_game3_select', 8);
+        const n4_item = NpcHelper.createNpcItem(this, 1, width / 2 + 100, 350, 1, 'stage_object_game4', 'stage_object_game4_select', 8);
+        const n5_item = NpcHelper.createNpcItem(this, 1, 150, 280, 1, 'stage_object_game5', 'stage_object_game5_select', 7);
+        const n6_item = NpcHelper.createNpcItem(this, 1, width / 2 + 380, 1050, 1, 'stage_object_game6', 'stage_object_game6_select', 7);
+        const n7_item = NpcHelper.createNpcItem(this, 1, width / 2 + 950, 650, 1, 'stage_object_game7', 'stage_object_game7_select', 10);
+
+
 
         this.interactiveNpcs.push(n1);
 
@@ -264,7 +252,7 @@ export class MainStreetScene extends Phaser.Scene {
 
 
         this.playerSprite = this.add.sprite(playerPos.x, playerPos.y,
-            `${genderKey}_idle`).setDepth(14).setScale(2);
+            `${genderKey}_idle`).setDepth(7).setScale(1.5);
 
         this.playerSprite.anims.play(`${genderKey}_idle_anim`);
 
@@ -292,7 +280,7 @@ export class MainStreetScene extends Phaser.Scene {
         }
         this.playerSprite.lastDirectionLeft = isLeft;
 
-        this.playerSprite.x = Phaser.Math.Clamp(this.playerSprite.x, 600, 5300);
+        this.playerSprite.x = Phaser.Math.Clamp(this.playerSprite.x, 200, 2300);
 
 
         const allNpcs = [...this.interactiveNpcs];
@@ -304,12 +292,9 @@ export class MainStreetScene extends Phaser.Scene {
             if (dist < npc.proximityDistance) {
                 npc.canInteract = true;
                 //  npc.setTint(0x888888);
-                this.switchToGlowAndBack(npc);
             } else {
                 npc.canInteract = false;
                 //  npc.setTint(0xffffff);
-                this.restoreFromGlow(npc);
-
                 // IF THIS NPC was the one owning the active bubbles
                 if ((this.currentActiveBubble && this.currentActiveBubble.ownerNpc === npc) ||
                     (this.characterActiveBubble && this.characterActiveBubble.ownerNpc === npc)) {
@@ -332,24 +317,6 @@ export class MainStreetScene extends Phaser.Scene {
                 }
             }
         });
-    }
-
-    switchToGlowAndBack(npc, glow) {
-        if (!npc || npc.isGlow) return;
-        if (!npc.glowKey || !npc.glowAnimKey) return;
-
-        npc.setTexture(npc.glowKey);
-        npc.play(npc.glowAnimKey, true);
-        npc.isGlow = true;
-    }
-
-    restoreFromGlow(npc) {
-        if (!npc || !npc.isGlow) return;
-        if (!npc.baseKey || !npc.baseAnimKey) return;
-
-        npc.setTexture(npc.baseKey);
-        npc.play(npc.baseAnimKey, true);
-        npc.isGlow = false;
     }
 
     handleAnimation(gender, isMoving, isLeft) {
