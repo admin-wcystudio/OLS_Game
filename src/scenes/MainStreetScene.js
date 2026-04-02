@@ -210,7 +210,7 @@ export class MainStreetScene extends Phaser.Scene {
 
 
         this.bubbleTimers = [];
-        const npc1_bubbles = ['npc1_bubble_1'];
+        const game1_bubble = ''
 
 
         // NPCs (trigger game)
