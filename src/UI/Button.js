@@ -60,7 +60,8 @@ class BaseButton extends Phaser.GameObjects.Image {
 
     handleOver() {
         if (!this.input?.enabled || this.isClicked) return;
-        // Subtle hover effect: scale up slightly
+
+        this.setPressedState();
         this.scene.tweens.add({
             targets: this,
             scale: 1.05,

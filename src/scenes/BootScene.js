@@ -10,7 +10,7 @@ export class BootScene extends Phaser.Scene {
         // Load assets for the boot scene
         const gameStartPath = 'assets/images/GameStart/';
 
-        this.load.video('cover_video', gameStartPath + 'cover_bg.webm');
+        this.load.video('cover_video', gameStartPath + 'cover_bg.mp4');
         this.load.image('close_button', gameStartPath + 'close_button.png');
         this.load.image('close_button_click', gameStartPath + 'close_button_click.png');
         // Video/webm not supported by this.load.image
@@ -65,16 +65,28 @@ export class BootScene extends Phaser.Scene {
         const itemKeys = [
             'itempage_item1',
             'itempage_item1_select',
-            'game1_object_description',
+            'itempage_item1_description',
+
             'itempage_item2_select',
             'itempage_item2',
-            'game2_object_description',
+            'itempage_item2_description',
+
             'itempage_item3',
             'itempage_item3_select',
-            'game3_object_description',
+            'itempage_item3_description',
+
             'itempage_item4',
             'itempage_item4_select',
-            'game4_object_description',
+            'itempage_item4_description',
+
+            'itempage_item5',
+            'itempage_item5_select',
+            'itempage_item5_description',
+
+            'itempage_item6',
+            'itempage_item6_select',
+            'itempage_item6_description',
+
             'itempage_item_box',
             'itempage_bg',
             'itempage_panel_bg',
@@ -136,13 +148,13 @@ export class BootScene extends Phaser.Scene {
         const savedData = localStorage.getItem('gameSettings');
 
         if (savedData) {
-            const settings = JSON.parse(savedData);
+            const settings = JSON.parse(ssavedData);
 
             this.sound.volume = settings.volume * 0.2;
 
             this.registry.set('globalSettings', settings);
         }
-        this.scene.start('GameScene_5');
+        this.scene.start('MainStreetScene');
     }
 }
 
