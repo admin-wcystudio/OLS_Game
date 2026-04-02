@@ -13,7 +13,7 @@ export class GameScene_5 extends BaseGameScene {
 
         const path = 'assets/images/Game_5/';
 
-
+        this.load.image('game5_npc_box_mainstreet', `${path}game5_npc_box1.png`);
         this.load.image('game5_npc_box_win', `${path}game5_npc_box2.png`);
         this.load.image('game5_npc_box_tryagain', `${path}game5_npc_box3.png`);
 
