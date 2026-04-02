@@ -23,7 +23,9 @@ export class GameScene_6 extends BaseGameScene {
         this.load.image('game6_npc_box_tryagain', `${path}game6_npc_box3.png`);
 
         this.load.image('game6_hit_button', `${path}game6_click_button.png`);
-        this.load.image('game6_hit_button_select', `${path}game6_click_button_select.png`);
+        this.load.image('game6_hit_button_select', `${path}game6_click_button_select.png`)
+
+        this.load.image('game6_object_description', path + 'game6_object_description.png');;
 
         this.gender = 'M';
         if (localStorage.getItem('player')) {
@@ -85,9 +87,9 @@ export class GameScene_6 extends BaseGameScene {
 
         // Define success ranges for each bar (min and max x positions)
         this.hitRanges = [
-            { min: 200, max: 650 },  // Bar 1 success range
-            { min: 1250, max: 1550 },  // Bar 2 success range
-            { min: 650, max: 1050 }   // Bar 3 success range
+            { min: 450, max: 580 },  // Bar 1 success range
+            { min: 1060, max: 1200 },  // Bar 2 success range
+            { min: 720, max: 850 }   // Bar 3 success range
         ];
 
         this.hitButton = new CustomButton(this, 1720, 880,
@@ -104,7 +106,26 @@ export class GameScene_6 extends BaseGameScene {
         this.hitButton.on('pointerout', () => {
             this.hitButton.setTexture('game6_hit_button');
         });
+
+        //this.drawDebugRanges();
     }
+
+    // drawDebugRanges() {
+    //     const colors = [0x00ff00, 0x0088ff, 0xff8800];
+    //     const labels = ['Bar 1', 'Bar 2', 'Bar 3'];
+    //     const gfx = this.add.graphics().setDepth(600);
+
+    //     this.hitRanges.forEach((range, i) => {
+    //         gfx.fillStyle(colors[i], 0.25);
+    //         gfx.fillRect(range.min, 0, range.max - range.min, this.height);
+    //         gfx.lineStyle(2, colors[i], 0.8);
+    //         gfx.strokeRect(range.min, 0, range.max - range.min, this.height);
+
+    //         this.add.text(range.min + 4, 10 + i * 24, `${labels[i]}: ${range.min}–${range.max}`, {
+    //             fontSize: '18px', color: '#ffffff', stroke: '#000000', strokeThickness: 3
+    //         }).setDepth(601);
+    //     });
+    // }
 
     handleHitButtonClick() {
         if (this.isHit || !this.isGameActive) return; // Prevent multiple clicks
