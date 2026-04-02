@@ -301,22 +301,7 @@ export class GameScene_2 extends BaseGameScene {
     }
 
     showWin() {
-
-        // Second: Show generic win2 bubble
-        this.bubbleImage2 = this.add.image(this.centerX, this.cameras.main.height * 0.8, 'game2_npc_box_win')
-            .setDepth(555).setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => {
-                this.bubbleImage2.destroy();
-
-                // Third: Show gender-specific win3 bubble
-                this.bubbleImage3 = this.add.image(this.centerX, this.cameras.main.height * 0.8, `game2_npc_box_${this.genderKey}_win3`)
-                    .setDepth(555).setInteractive({ useHandCursor: true })
-                    .on('pointerdown', () => {
-                        this.bubbleImage3.destroy();
-                        this.showObjectPanel();
-                    });
-            });
-
+        this.showObjectPanel();
     }
 
     showObjectPanel() {
