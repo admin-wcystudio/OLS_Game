@@ -15,439 +15,216 @@ export class GameScene_1 extends BaseGameScene {
         this.centerX = this.width / 2;
         this.centerY = this.height / 2;
 
-        this.load.image('game1_npc_box_intro', `${path}game1_npc_box3.png`);
+        this.load.image('game1_npc_box_mainstreet', `${path}game1_npc_box1.png`);
+        this.load.image('game1_npc_box_intro', `${path}game1_npc_box2.png`);
+        this.load.image('game1_npc_box_win', `${path}game1_npc_box3.png`);
+        this.load.image('game1_npc_box_tryagain', `${path}game1_npc_box4.png`);
+        this.load.image('game1_rotate', `${path}game1_rotate.png`);
 
-        this.load.image('game1_npc_box_boy_win', `${path}game1_npc_box4.png`);
-        this.load.image('game1_npc_box_girl_win', `${path}game1_npc_girl_box4.png`);
-        this.load.image('game1_npc_box_win', `${path}game1_npc_box5.png`);
-        this.load.image('game1_npc_box_boy_win3', `${path}game1_npc_box6.png`);
-        this.load.image('game1_npc_box_girl_win3', `${path}game1_npc_girl_box6.png`);
+        this.load.image('game1_puzzle_guide', `${path}game1_puzzle_guide.png`);
 
-        this.load.image('game1_npc_box_tryagain', `${path}game1_npc_box7.png`);
+        for (let i = 1; i <= 6; i++) {
+            this.load.image(`game1_puzzle${i}`, `${path}game1_puzzle${i}.png`);
+        }
 
         this.gender = 'F';
         if (localStorage.getItem('player')) {
             this.gender = JSON.parse(localStorage.getItem('player')).gender;
         }
 
-        if (this.gender === 'M') {
-            this.load.spritesheet('boy_fail', path +
-                'game1_boy_fail.png', { frameWidth: 340, frameHeight: 500 });
-
-            this.load.spritesheet('boy_left', path +
-                'game1_boy_left.png', { frameWidth: 340, frameHeight: 500 });
-
-            this.load.spritesheet('boy_middle', path +
-                'game1_boy_middle.png', { frameWidth: 340, frameHeight: 500 });
-
-            this.load.spritesheet('boy_right', path +
-                'game1_boy_right.png', { frameWidth: 340, frameHeight: 500 });
-
-            this.load.spritesheet('boy_success', path +
-                'game1_boy_success.png', { frameWidth: 340, frameHeight: 500 });
-        } else {
-            this.load.spritesheet('girl_fail', path +
-                'game1_girl_fail.png', { frameWidth: 170, frameHeight: 250 });
-
-            this.load.spritesheet('girl_left', path +
-                'game1_girl_left.png', { frameWidth: 170, frameHeight: 250 });
-            this.load.spritesheet('girl_middle', path +
-                'game1_girl_middle.png', { frameWidth: 170, frameHeight: 250 });
-
-            this.load.spritesheet('girl_right', path +
-                'game1_girl_right.png', { frameWidth: 170, frameHeight: 250 });
-
-            this.load.spritesheet('girl_success', path +
-                'game1_girl_success.png', { frameWidth: 170, frameHeight: 250 });
-        }
+        this.load.spritesheet('game1_success_preview',
+            `${path}game1_success_preview.png`, {
+            frameWidth: 316.52,
+            frameHeight: 360
+        });
 
     }
 
     create() {
-        this.createAnimations();
-
         this.initGame('game1_bg', 'game1_description', false, false, {
-            targetRounds: 3,
+            targetRounds: 1,
             roundPerSeconds: 60,
             isAllowRoundFail: false,
             isContinuousTimer: true,
             sceneIndex: 1
         });
+        this.anims.create({
+            key: 'success_preview_anim',
+            frames: this.anims.generateFrameNumbers('game1_success_preview', { start: 0, end: 125 }),
+            framerate: 30,
+            repeat: -1
+        });
 
-        this.leftBtn = new CustomButton(this, 1550, 900, 'left_btn', 'left_btn_click', () => {
-            this.moveDirection('left');
-            this.resetPlayerState();
-        }, () => {
-        }).setDepth(2);
+    }
+    setupGameObjects() {
+        this.selectedPuzzle = null;
 
-        this.rightBtn = new CustomButton(this, 1750, 900, 'right_btn', 'right_btn_click',
-            () => {
-                this.moveDirection('right');
-                this.resetPlayerState();
-            }, () => {
+        if (this.guide) this.guide.destroy();
+        if (this.rotateButton) this.rotateButton.destroy();
+        this.input.removeAllListeners('drag');
+        this.input.removeAllListeners('dragend');
 
-            }).setDepth(2);
+        const centerX = this.cameras.main.width / 2;
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
 
-        // Initially disable buttons until game starts
-        this.leftBtn.setVisible(false);
-        this.rightBtn.setVisible(false);
-        this.leftBtn.disableInteractive();
-        this.rightBtn.disableInteractive();
-
-        this.genderKey = this.gender === 'M' ? 'boy' : 'girl';
-        console.log('genderKey:', this.genderKey);
-
-        this.player = this.add.sprite(this.centerX, 1000, `${this.genderKey}_middle`)
-            .setOrigin(0.5, 1).setDepth(2);
-
-        if (this.genderKey === 'girl') {
-            this.player.setScale(2); // Adjust scale for
-        }
-        this.player.anims.play(`${this.genderKey}_middle_anim`, true);
-
-        this.playerBasket = this.add.zone(this.player.x, this.player.y - 150, 180, 80);
-
-        this.physics.add.existing(this.playerBasket);
-        this.playerBasket.body.setAllowGravity(false);
-        this.playerBasket.body.setImmovable(true);
-
-        this.basketGfx = this.add.graphics();
-        this.basketGfx.setDepth(3);
-
-
-        // spawn settings
-        this.canSpawn = false;
-        this.minX = 200;
-        this.maxX = 1600;
-        this.minY = 0;
-        this.maxY = 700;
-        this.failSpeed = 4;
-        this.isSlowDown = false;
-        this.slowDownSpeed = this.failSpeed / 2;
-
-        this.successCount = 0;
-
-        this.failItemKeys = [
-            'game1_failobject1',
-            'game1_failobject2',
-            'game1_failobject3',
-            'game1_failobject4'
+        const defaultPuzzles = [
+            { content: 'game1_puzzle1', targetX: centerX - 100, targetY: 260 },
+            { content: 'game1_puzzle2', targetX: centerX + 100, targetY: 260 },
+            { content: 'game1_puzzle3', targetX: centerX - 100, targetY: 460 },
+            { content: 'game1_puzzle4', targetX: centerX + 100, targetY: 460 },
+            { content: 'game1_puzzle5', targetX: centerX - 100, targetY: 660 },
+            { content: 'game1_puzzle6', targetX: centerX + 100, targetY: 660 }
         ];
 
-        this.fallingItemsGroup = this.physics.add.group();
-        this.fallingItems = [];
-        this.spawnTimer = 0;
+        this.puzzleGroup = this.add.group();
 
-        // Setup overlap between basket and falling items group
-        this.physics.add.overlap(this.playerBasket, this.fallingItemsGroup, (basket, item) => {
-            this.handleItemCollection(item);
-        }, null, this);
-    }
 
-    moveDirection(direction) {
-        const speed = 100;
-        this.player.anims.play(`${this.genderKey}_${direction}_anim`, true);
-        this.player.x += direction === 'left' ? -speed : speed;
-    }
+        this.guide = this.add.image(centerX, 460, 'game1_puzzle_guide').setDepth(10);
 
-    resetPlayerState() {
-        this.time.delayedCall(300, () => {
-            this.player.anims.play(`${this.genderKey}_middle_anim`, true);
+        defaultPuzzles.forEach(data => {
+            let piece = this.add.image(0, 0, data.content).setDepth(50);
+            piece.setData({ targetX: data.targetX, targetY: data.targetY, isCorrect: false });
+            piece.on('pointerdown', () => this.selectPuzzle(piece));
+            this.puzzleGroup.add(piece);
         });
-    }
 
+        this.randomPuzzlePosition(this.puzzleGroup.getChildren());
+
+        // 旋轉按鈕
+        this.rotateButton = new CustomButton(this, width - 200, height - 200, 'game1_rotate', null, () => {
+            if (this.selectedPuzzle) this.selectedPuzzle.angle += 90;
+        }).setDepth(100);
+
+        // 拖拽事件 (搬移到這裡確保只設定一次)
+        this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+            if (this.selectedPuzzle !== gameObject) this.selectPuzzle(gameObject);
+            gameObject.setPosition(dragX, dragY).setDepth(100);
+        });
+
+        this.input.on('dragend', (pointer, gameObject) => {
+            gameObject.setDepth(50);
+            this.checkSnap(gameObject);
+        });
+
+
+        //==== Debug Graphics ===========================================================
+        // const debugGraphics = this.add.graphics().setDepth(2); // 擺喺背景上面，物件下面
+        // debugGraphics.lineStyle(3, 0xff0000, 1); // 紅色線，粗度 2
+
+        // defaultPuzzles.forEach(data => {
+        //     const rectSize = 200;
+        //     const startX = data.targetX - rectSize / 2;
+        //     const startY = data.targetY - rectSize / 2;
+
+        //     // 畫出目標區域矩形
+        //     debugGraphics.strokeRect(startX, startY, rectSize, rectSize);
+
+        //     // 喺方框旁邊寫低係邊塊 Puzzle，方便對號入座
+        //     this.add.text(startX, startY - 20, data.content, {
+        //         fontSize: '16px',
+        //         fill: '#ff0000'
+        //     }).setDepth(1);
+        // });
+
+        // const tolerance = 60; // 同你 checkSnap 裡面個數值一樣
+        // defaultPuzzles.forEach(data => {
+        //     debugGraphics.lineStyle(1, 0x00ff00, 0.5); // 綠色虛線感
+        //     debugGraphics.strokeCircle(data.targetX, data.targetY, tolerance);
+        // });
+    }
+    /**
+     * 控制拼圖是否可被操作
+     */
     enableGameInteraction(enabled) {
-        this.canSpawn = enabled;
-        this.leftBtn.setVisible(enabled);
-        this.rightBtn.setVisible(enabled);
-
-        if (enabled) {
-            this.leftBtn.setInteractive();
-            this.rightBtn.setInteractive();
-        } else {
-            this.leftBtn.disableInteractive();
-            this.rightBtn.disableInteractive();
-        }
-        this.fallingItems.forEach(item => {
-            item.setActive(enabled).setVisible(enabled);
-        });
-    }
-
-    resetForNewRound() {
-        // Clear all falling items from both group and array
-        if (this.fallingItemsGroup) {
-            this.fallingItemsGroup.clear(true, true); // Remove and destroy all children
-        }
-
-        for (let i = this.fallingItems.length - 1; i >= 0; i--) {
-            const item = this.fallingItems[i];
-            if (item) {
-                item.destroy();
-            }
-        }
-        this.fallingItems = [];
-
-        // Reset spawn timer
-        this.lastSpawnTime = null;
-        this.lastSuccessSpawnTime = null;
-        this.canSpawn = false;
-
-        // Reset player position to center
-        if (this.player) {
-            this.player.x = this.centerX;
-            this.player.y = 1000;
-            this.player.anims.play(`${this.genderKey}_middle_anim`, true);
-        }
-
-        // Reset player basket to match player position and update physics body
-        if (this.playerBasket && this.playerBasket.body) {
-            const newX = this.centerX;
-            const newY = 1000 - 450; // Same calculation as in update
-
-            this.playerBasket.x = newX;
-            this.playerBasket.y = newY;
-
-            // Important: Update the physics body position explicitly
-            this.playerBasket.body.reset(newX, newY);
-        }
-
-        // Reset fail speed
-        this.failSpeed = 4;
-        this.isSlowDown = false;
-
-        // Reset success counter
-        this.successCount = 0;
-
-        console.log('[GameScene_1] Reset for new round');
-    }
-
-
-    update() {
-
-        if (!this.canSpawn) return;
-
-        if (this.player && this.playerBasket) {
-            // Sync the invisible physics body - update both position and physics body
-            this.playerBasket.x = this.player.x;
-            this.playerBasket.y = this.player.y - 450;
-
-            // Update the physics body position to match
-            if (this.playerBasket.body) {
-                this.playerBasket.body.x = this.playerBasket.x - this.playerBasket.width / 2;
-                this.playerBasket.body.y = this.playerBasket.y - this.playerBasket.height / 2;
-            }
-
-            // // Redraw the visual box
-            // this.basketGfx.clear();
-            // this.basketGfx.lineStyle(2, 0x00ff00, 1); // Green border
-            // this.basketGfx.strokeRect(
-            //     this.playerBasket.x - 75, // Center it (150 width / 2)
-            //     this.playerBasket.y - 25, // Center it (50 height / 2)
-            //     this.playerBasket.width,
-            //     this.playerBasket.height
-            // );
-            // Spawn new fail item every 800ms
-            if (!this.lastSpawnTime) this.lastSpawnTime = this.time.now;
-            if (this.time.now - this.lastSpawnTime > 800) {
-                this.spawnRandomFailItem();
-                this.lastSpawnTime = this.time.now;
-            }
-
-            // Spawn success item on a separate timer (e.g., every 3-5 seconds)
-            if (!this.lastSuccessSpawnTime) this.lastSuccessSpawnTime = this.time.now;
-            if (this.time.now - this.lastSuccessSpawnTime > Phaser.Math.Between(1000, 2000)) {
-                this.spawnSuccessItem();
-                this.lastSuccessSpawnTime = this.time.now;
-            }
-
-            // Make all falling items fall
-            for (let i = this.fallingItems.length - 1; i >= 0; i--) {
-                const item = this.fallingItems[i];
-                if (item.active) {
-                    item.y += this.failSpeed; // fall speed
-                    if (item.y > this.maxY) {
-                        item.setActive(false).setVisible(false);
-                        this.fallingItems.splice(i, 1);
-                    }
-                }
-            }
-        }
-    }
-
-
-
-    handleLose() {
-        if (this.gameState === 'gameLose' || this.gameState === 'gameWin') return;
-
-        if (!this.isSlowDown) {
-            this.failSpeed = this.slowDownSpeed;
-            this.isSlowDown = true;
-            console.log("Fail speed reduced for next rounds.");
-        } else {
-            this.currentFailCount = (this.currentFailCount || 0) + 1;
-            this.isGameActive = false;
-            this.gameState = 'gameLose';
-            this.fallingItems.forEach(item => item.destroy());
-            this.label = this.add.image(1650, 350, 'game_fail_label').setDepth(555);
-            if (this.gameTimer) this.gameTimer.stop();
-            this.enableGameInteraction(false);
-            this.updateRoundUI(false);
-
-            this.showBubble('tryagain');
-        }
-    }
-
-    showWin() {
-
-        // Second: Show generic win2 bubble
-        this.bubbleImage2 = this.add.image(this.centerX, this.cameras.main.height * 0.8, 'game1_npc_box_win')
-            .setDepth(555).setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => {
-                this.bubbleImage2.destroy();
-
-                // Third: Show gender-specific win3 bubble
-                this.bubbleImage3 = this.add.image(this.centerX, this.cameras.main.height * 0.8, `game1_npc_box_${this.genderKey}_win3`)
-                    .setDepth(555).setInteractive({ useHandCursor: true })
-                    .on('pointerdown', () => {
-                        this.bubbleImage3.destroy();
-                        this.showObjectPanel();
-                    });
-            });
-
-    }
-
-    showObjectPanel() {
-        const objectPanel = new CustomPanel(this, 960, 600, [{
-            content: 'game1_object_description',
-            closeBtn: 'close_btn',
-            closeBtnClick: 'close_btn_click'
-        }]);
-        objectPanel.setDepth(1000);
-        objectPanel.show();
-        objectPanel.setCloseCallBack(() => GameManager.backToMainStreet(this));
-    }
-
-    spawnRandomFailItem() {
-        // Pick a random fail item key
-        const key = Phaser.Utils.Array.GetRandom(this.failItemKeys);
-        // Spawn at random x, always y = minY
-        const x = Phaser.Math.Between(this.minX, this.maxX);
-
-        const y = this.minY;
-        // Create the sprite
-        const item = this.physics.add.sprite(x, y, key).setOrigin(0.5, 0.5).setDepth(2);
-        item.isSuccessObject = false;
-
-        item.setActive(true).setVisible(true);
-        this.fallingItemsGroup.add(item);
-        this.fallingItems.push(item);
-    }
-
-    spawnSuccessItem() {
-        const key = 'game1_successobject';
-        // Spawn at random x, always y = minY
-        const x = Phaser.Math.Between(this.minX, this.maxX);
-
-        const y = this.minY;
-        // Create the sprite
-        const item = this.physics.add.sprite(x, y, key).setOrigin(0.5, 0.5).setDepth(2);
-        item.isSuccessObject = true;
-
-        item.setActive(true).setVisible(true);
-        this.fallingItemsGroup.add(item);
-        this.fallingItems.push(item);
-    }
-
-
-    handleItemCollection(item) {
-        if (!this.isGameActive || this.gameState === 'gameWin') return;
-
-        if (item.isSuccessObject) {
-            item.destroy();
-
-            // Increment success counter
-            this.successCount++;
-            console.log(`Success item collected! Count: ${this.successCount}/${this.targetRounds}`);
-
-            // Update round UI to show progress (uses current roundIndex)
-            this.updateRoundUI(true);
-
-            // Only trigger win when all required successes are collected
-            if (this.successCount >= this.targetRounds) {
-                this.onRoundWin();
+        this.puzzleGroup.getChildren().forEach(p => {
+            if (enabled) {
+                p.setInteractive({ draggable: true, useHandCursor: true });
             } else {
-                // Increment roundIndex for next collection's UI update
-                this.roundIndex++;
+                p.disableInteractive();
             }
-        } else {
-            item.destroy();
-            this.fallingItemsGroup.remove(item);
-            this.handleLose();
+        });
+        this.guide.setVisible(enabled);
+    }
+
+
+    // --- 拼圖專用邏輯 (保持不變) ---
+
+    selectPuzzle(piece) {
+        if (this.selectedPuzzle) {
+            this.selectedPuzzle.clearTint();
+        }
+        this.selectedPuzzle = piece;
+        piece.setTint(0xaaaaaa);
+    }
+
+    checkSnap(piece) {
+        const { targetX, targetY } = piece.data.values;
+        const dist = Phaser.Math.Distance.Between(piece.x, piece.y, targetX, targetY);
+        const isAngleCorrect = (piece.angle % 360 === 0);
+
+        if (dist < 60 && isAngleCorrect) {
+            piece.setPosition(targetX, targetY).setData('isCorrect', true).disableInteractive().clearTint();
+            this.checkAllDone();
         }
     }
-    createAnimations() {
-        // Boy animations
-        this.anims.create({
-            key: 'boy_fail_anim',
-            frames: this.anims.generateFrameNumbers('boy_fail', { start: 0, end: 66 }),
-            frameRate: 30,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'boy_left_anim',
-            frames: this.anims.generateFrameNumbers('boy_left', { start: 0, end: 66 }),
-            frameRate: 30,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'boy_middle_anim',
-            frames: this.anims.generateFrameNumbers('boy_middle', { start: 0, end: 66 }),
-            frameRate: 30,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'boy_right_anim',
-            frames: this.anims.generateFrameNumbers('boy_right', { start: 0, end: 66 }),
-            frameRate: 30,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'boy_success_anim',
-            frames: this.anims.generateFrameNumbers('boy_success', { start: 0, end: 66 }),
-            frameRate: 30,
-            repeat: -1
-        });
 
-        // Girl animations
-        this.anims.create({
-            key: 'girl_fail_anim',
-            frames: this.anims.generateFrameNumbers('girl_fail', { start: 0, end: 66 }),
-            frameRate: 30,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'girl_left_anim',
-            frames: this.anims.generateFrameNumbers('girl_left', { start: 0, end: 66 }),
-            frameRate: 30,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'girl_middle_anim',
-            frames: this.anims.generateFrameNumbers('girl_middle', { start: 0, end: 66 }),
-            frameRate: 30,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'girl_right_anim',
-            frames: this.anims.generateFrameNumbers('girl_right', { start: 0, end: 66 }),
-            frameRate: 30,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'girl_success_anim',
-            frames: this.anims.generateFrameNumbers('girl_success', { start: 0, end: 66 }),
-            frameRate: 30,
-            repeat: -1
+    randomPuzzlePosition(puzzles) {
+        const centerX = this.cameras.main.width / 2;
+        const centerY = this.cameras.main.height / 2;
+        const allowedRotations = [0, 90, 180, 270];
+
+        puzzles.forEach(puzzle => {
+            puzzle.setPosition(centerX + Phaser.Math.Between(-400, 400), centerY + Phaser.Math.Between(-300, 100));
+            puzzle.setAngle(Phaser.Utils.Array.GetRandom(allowedRotations));
         });
     }
+
+    checkAllDone() {
+        const allCorrect = this.puzzleGroup.getChildren().every(p => p.getData('isCorrect'));
+        if (allCorrect) {
+            console.log("所有拼圖完成!");
+            this.onRoundWin();
+        }
+    }
+
+    playFeedback(isSuccess, onComplete) {
+        this.puzzleGroup.setVisible(false);
+        if (this.successVideo) this.successVideo.destroy();
+
+        this.previewSprite = this.add.sprite(960, 440,
+            'game1_success_preview').setDepth(1000).setScale(2);
+        this.previewSprite.play('success_preview_anim');
+
+
+        this.time.delayedCall(500, () => {
+            if (onComplete) onComplete();
+        });
+    }
+
+    /**
+     * 最終獲勝面板
+     */
+    showWin() {
+        this.puzzleGroup.setVisible(false);
+
+        this.time.delayedCall(1000, () => {
+            const objectPanel = new CustomSinglePanel(this, 960, 600, 'game1_object_description');
+            objectPanel.setDepth(1000).setVisible(true);
+            objectPanel.setCloseCallBack(() => GameManager.backToMainStreet(this));
+        });
+    }
+
+    /**
+     * 重置每一局的拼圖狀態
+     */
+    resetForNewRound() {
+        this.puzzleGroup.setVisible(true);
+        this.puzzleGroup.getChildren().forEach(p => p.setData('isCorrect', false));
+        this.previewSprite.destroy();
+        this.randomPuzzlePosition(this.puzzleGroup.getChildren());
+    }
+
+
+
 }
