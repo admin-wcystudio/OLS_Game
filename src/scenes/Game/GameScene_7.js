@@ -49,36 +49,22 @@ export class GameScene_7 extends BaseGameScene {
     }
 
     create() {
-        this.width = this.cameras.main.width;
-        this.height = this.cameras.main.height;
-        this.centerX = this.width / 2;
-        this.centerY = this.height / 2;
-
-        this.confirmBtn = new CustomButton(this, this.centerX, this.height - 150,
-            'confirm_button', 'confirm_button_select', () => {
-                this.checkAnswer();
-            });
-        this.confirmBtn.setDepth(100).setVisible(false);
 
         this.initGame('game7_bg', 'game7_description', true, false, {
-            targetRounds: 3,
+            targetRounds: 1,
             roundPerSeconds: 60,
             isAllowRoundFail: false,
             isContinuousTimer: true,
             sceneIndex: 7
         });
-
-        // this.gameUI.descriptionPanel.setVisible(false);
-
     }
-
     setupGameObjects() {
 
-        this.isChecked = false; // Reset checking flag
+        this.isChecked = false;
         const centerX = this.cameras.main.width / 2;
         const centerY = this.cameras.main.height / 2 - 100;
 
-        this.add.image(centerX, centerY, 'game7_card_bg').setDepth(5);
+        this.cardBg = this.add.image(centerX, centerY, 'game7_card_bg').setDepth(5);
         this.spawnCardPositions = [
             { x: centerX - 560, y: centerY + 350, },
             { x: centerX - 280, y: centerY + 350, },
@@ -91,8 +77,8 @@ export class GameScene_7 extends BaseGameScene {
             { id: 1, content: 'game7_object1', targetX: centerX - 560, targetY: centerY, occupiedBy: null },
             { id: 2, content: 'game7_object2', targetX: centerX - 280, targetY: centerY, occupiedBy: null },
             { id: 3, content: 'game7_object3', targetX: centerX, targetY: centerY, occupiedBy: null },
-            { id: 4, content: 'game7_object4', targetX: centerX + 280, targetY: centerY, occupiedBy: null },
-            { id: 5, content: 'game7_object5', targetX: centerX + 560, targetY: centerY, occupiedBy: null }
+            { id: 4, content: 'game7_object4', targetX: centerX + 275, targetY: centerY, occupiedBy: null },
+            { id: 5, content: 'game7_object5', targetX: centerX + 550, targetY: centerY, occupiedBy: null }
         ];
 
 
@@ -125,9 +111,10 @@ export class GameScene_7 extends BaseGameScene {
         this.confirm_button = new CustomButton(this, centerX + 800, centerY + 400,
             'confirm_button', 'confirm_button_select',
             () => {
+                console.log(' button clicked');
                 if (this.isChecked) return;
-                this.checkAllDone();
                 this.isChecked = true;
+                this.checkAllDone();
             }, () => { });
         this.confirm_button.setActive(false);
 
@@ -151,14 +138,12 @@ export class GameScene_7 extends BaseGameScene {
         this.selectedCard = card;
         this.selectedCard.setTint(0xaaaaaa);
 
-        // Show description panel when clicking on card
-        this.showObjectDescription(card.texture.key);
     }
 
     showObjectDescription(objectKey) {
         const descriptionKey = `${objectKey}_description`;
 
-        const descriptionPanel = new CustomPanel(this, this.centerX, this.centerY, [{
+        const descriptionPanel = new CustomPanel(this, 960, 540, [{
             content: descriptionKey,
             closeBtn: 'close_btn',
             closeBtnClick: 'close_btn_click'
@@ -176,6 +161,7 @@ export class GameScene_7 extends BaseGameScene {
             }
         });
         this.confirm_button.setActive(enable);
+        this.cardBg.setVisible(enable);
         if (enable) {
             this.isChecked = false;
         }
@@ -192,9 +178,6 @@ export class GameScene_7 extends BaseGameScene {
                 if (d < threshold && d < minDist) {
                     minDist = d;
                     nearest = pos;
-                    card.setPosition(pos.targetX, pos.targetY);
-                    pos.occupiedBy = card;
-                    card.clearTint();
                 }
             } else {
                 if (pos.occupiedBy === card) {
@@ -204,6 +187,14 @@ export class GameScene_7 extends BaseGameScene {
             }
             //console.log('Target Position -', pos.id, ',current card', pos.occupiedBy ? pos.occupiedBy.texture.key : 'none');
         });
+
+        // Snap to nearest slot and show description
+        if (nearest) {
+            card.setPosition(nearest.targetX, nearest.targetY);
+            nearest.occupiedBy = card;
+            card.clearTint();
+            // this.showObjectDescription(card.texture.key);
+        }
     }
 
     randomCardPosition(cards) {
@@ -248,54 +239,81 @@ export class GameScene_7 extends BaseGameScene {
     onRoundWin() {
         if (!this.isGameActive || this.gameState === 'gameWin') return;
 
-        let isFinalWin = (this.roundIndex + 1 >= this.targetRounds) || this.isAllowRoundFail;
+        console.log(`Round ${this.roundIndex} win`);
+        let isFinalWin = (this.roundIndex + 1 == this.targetRounds);
         this.gameState = isFinalWin ? 'gameWin' : 'roundWin';
 
         this.gameTimer.stop();
         this._calculateTiming(isFinalWin);
         this.enableGameInteraction(false);
-        this.updateRoundUI(true);
 
         if (isFinalWin) {
             this.showFeedbackLabel(true);
-            this.playVideoFeedback();
+
+            this.playVideoFeedback(true);
+        } else {
+
+            this.roundIndex++;
+            this.resetForNewRound();
         }
-        //this.playFeedback(true, () =>);
+
+        this.updateRoundUI(true);
+
+
+    }
+
+    handleLose() {
+        this.isGameActive = false;
+        this.gameState = 'lose';
+
+        this.label = this.add.image(1650, 350, 'game_fail_label').setDepth(555);
+        if (this.gameTimer) this.gameTimer.stop();
+        this.enableGameInteraction(false);
+        this.updateRoundUI(false);
+        this.playVideoFeedback(false);
     }
 
     playVideoFeedback(isWin) {
+        console.log('Playing video feedback, win:', isWin);
         this.cardGroup.setVisible(false);
         this.confirm_button.setVisible(false);
 
         if (isWin) {
-            this.video = this.add.video(this.centerX, this.centerY, `game7_success`).setDepth(100);
+            this.video = this.add.video(960, 540, `game7_success`).setDepth(100);
             this.video.play(true);
 
-            this.time.delayedCall(500, () => {
+            this.time.delayedCall(1200, () => {
                 this.showBubble('win');
             });
         } else {
-            this.video = this.add.video(this.centerX, this.centerY, `game7_fail`).setDepth(100);
+            this.video = this.add.video(960, 540, `game7_fail`).setDepth(100);
             this.video.play(true);
-            this.time.delayedCall(500, () => {
-                this.showBubble('try again');
+            this.time.delayedCall(1200, () => {
+                this.showBubble('tryagain');
             });
         }
 
     }
 
     resetForNewRound() {
-        this.randomCardPosition(this.cardGroup.getChildren());
-        this.cardGroup.setVisible(true);
+        if (this.video) this.video.destroy();
+        if (this.label) { this.label.destroy(); this.label = null; }
 
+        this.randomCardPosition(this.cardGroup.getChildren());
         this.cardGroup.getChildren().forEach(card => {
             card.setData('isCorrect', false);
         });
         this.defaultCards.forEach(pos => {
             pos.occupiedBy = null;
         });
+        this.cardGroup.setVisible(true);
+        this.cardBg.setVisible(true);
+        this.confirm_button.setVisible(true);
+
+        this.gameState = 'playing';
+        this.isGameActive = true;
         this.isChecked = false;
         this.enableGameInteraction(true);
     }
 
-} 4
+}
