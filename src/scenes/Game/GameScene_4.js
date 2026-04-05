@@ -43,6 +43,7 @@ export class GameScene_4 extends BaseGameScene {
             isContinuousTimer: false,
             sceneIndex: 4
         });
+        // this.gameUI.descriptionPanel.setVisible(false);
     }
 
     setupGameObjects() {
@@ -52,31 +53,31 @@ export class GameScene_4 extends BaseGameScene {
         const centerX = this.cameras.main.width / 2;
         const centerY = this.cameras.main.height / 2;
 
-        this.add.image(centerX, centerY, 'game4_card_bg').setDepth(100);
+        this.add.image(centerX, centerY, 'game4_card_bg').setDepth(5);
 
         // Set 9 fixed card spawn positions
         this.spawnCardPositions = [
-            { x: centerX - 330, y: centerY - 300, },
-            { x: centerX, y: centerY - 220, },
-            { x: centerX + 300, y: centerY - 250, },
-            { x: centerX - 350, y: centerY + 250, },
-            { x: centerX - 20, y: centerY + 220, },
+            { x: centerX - 550, y: centerY - 250, },
+            { x: centerX - 200, y: centerY - 220, },
+            { x: centerX - 600, y: centerY + 200, },
+            { x: centerX - 250, y: centerY + 250, },
+            { x: centerX + 100, y: centerY + 220, },
             { x: centerX + 350, y: centerY + 300, },
-            { x: centerX - 200, y: centerY, },
-            { x: centerX + 200, y: centerY, },
-            { x: centerX, y: centerY + 50, }
+            { x: centerX + 100, y: centerY - 240, },
+            { x: centerX + 400, y: centerY - 200, },
+            { x: centerX + 600, y: centerY + 250, }
         ];
 
         this.defaultCards = [
-            { id: 1, content: 'game4_card1', targetX: centerX - 530, targetY: centerY, occupiedBy: null },
-            { id: 2, content: 'game4_card2', targetX: centerX - 325, targetY: centerY, occupiedBy: null },
-            { id: 3, content: 'game4_card3', targetX: centerX - 120, targetY: centerY, occupiedBy: null },
-            { id: 4, content: 'game4_card4', targetX: centerX + 85, targetY: centerY, occupiedBy: null },
-            { id: 5, content: 'game4_card5', targetX: centerX + 290, targetY: centerY, occupiedBy: null },
-            { id: 6, content: 'game4_card6', targetX: centerX + 495, targetY: centerY, occupiedBy: null },
-            { id: 7, content: 'game4_card7', targetX: centerX + 700, targetY: centerY, occupiedBy: null },
-            { id: 8, content: 'game4_card8', targetX: centerX + 905, targetY: centerY, occupiedBy: null },
-            { id: 9, content: 'game4_card9', targetX: centerX + 1110, targetY: centerY, occupiedBy: null }
+            { id: 1, content: 'game4_card1', targetX: centerX - 680, targetY: centerY, occupiedBy: null },
+            { id: 2, content: 'game4_card2', targetX: centerX - 520, targetY: centerY, occupiedBy: null },
+            { id: 3, content: 'game4_card3', targetX: centerX - 350, targetY: centerY, occupiedBy: null },
+            { id: 4, content: 'game4_card4', targetX: centerX - 180, targetY: centerY, occupiedBy: null },
+            { id: 5, content: 'game4_card5', targetX: centerX, targetY: centerY, occupiedBy: null },
+            { id: 6, content: 'game4_card6', targetX: centerX + 180, targetY: centerY, occupiedBy: null },
+            { id: 7, content: 'game4_card7', targetX: centerX + 360, targetY: centerY, occupiedBy: null },
+            { id: 8, content: 'game4_card8', targetX: centerX + 520, targetY: centerY, occupiedBy: null },
+            { id: 9, content: 'game4_card9', targetX: centerX + 700, targetY: centerY, occupiedBy: null }
         ];
 
         this.cardGroup = this.add.group();
@@ -117,14 +118,14 @@ export class GameScene_4 extends BaseGameScene {
         this.confirm_button.setDepth(100);
 
         //==== Debug Graphics ===========================================================
-        const debugGraphics = this.add.graphics().setDepth(this.depth + 2); // 擺喺背景上面，物件下面
-        debugGraphics.lineStyle(4, 0xff0000, 1); // 紅色線，粗度 2
+        // const debugGraphics = this.add.graphics().setDepth(this.depth + 2); // 擺喺背景上面，物件下面
+        // debugGraphics.lineStyle(4, 0xff0000, 1); // 紅色線，粗度 2
 
-        const tolerance = 60; // 同你 checkSnap 裡面個數值一樣
-        this.defaultCards.forEach(data => {
-            debugGraphics.lineStyle(3, 0x00ff00, 0.5); // 綠色虛線感
-            debugGraphics.strokeCircle(data.targetX, data.targetY, tolerance);
-        });
+        // const tolerance = 60; // 同你 checkSnap 裡面個數值一樣
+        // this.defaultCards.forEach(data => {
+        //     debugGraphics.lineStyle(3, 0x00ff00, 0.5); // 綠色虛線感
+        //     debugGraphics.strokeCircle(data.targetX, data.targetY, tolerance);
+        // });
     }
     selectCard(card) {
         if (this.selectedCard) {
@@ -166,7 +167,7 @@ export class GameScene_4 extends BaseGameScene {
                     card.clearTint();
                 }
             }
-            //console.log('Target Position -', pos.id, ',current card', pos.occupiedBy ? pos.occupiedBy.texture.key : 'none');
+            console.log('Target Position -', pos.id, ',current card', pos.occupiedBy ? pos.occupiedBy.texture.key : 'none');
         });
     }
 
@@ -180,6 +181,7 @@ export class GameScene_4 extends BaseGameScene {
     }
 
     checkAllDone() {
+        console.log('Checking all cards...');
         let allCorrect = true;
         this.defaultCards.forEach(cardInfo => {
             if (cardInfo.occupiedBy) {
@@ -195,7 +197,7 @@ export class GameScene_4 extends BaseGameScene {
         });
 
         if (allCorrect) {
-            this.handleWinBeforeBubble();
+            this.onRoundWin();
         } else {
             this.handleLose();
         }
