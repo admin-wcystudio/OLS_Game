@@ -20,6 +20,7 @@ export class GameScene_1 extends BaseGameScene {
         this.load.image('game1_npc_box_win', `${path}game1_npc_box3.png`);
         this.load.image('game1_npc_box_tryagain', `${path}game1_npc_box4.png`);
         this.load.image('game1_rotate', `${path}game1_rotate.png`);
+        this.load.image('game1_object_description', `${path}game1_object_description.png`);
 
         this.load.image('game1_puzzle_guide', `${path}game1_puzzle_guide.png`);
 
@@ -34,8 +35,8 @@ export class GameScene_1 extends BaseGameScene {
 
         this.load.spritesheet('game1_success_preview',
             `${path}game1_success_preview.png`, {
-            frameWidth: 316.52,
-            frameHeight: 360
+            frameWidth: 164.5,
+            frameHeight: 230
         });
 
     }
@@ -43,14 +44,14 @@ export class GameScene_1 extends BaseGameScene {
     create() {
         this.initGame('game1_bg', 'game1_description', false, false, {
             targetRounds: 1,
-            roundPerSeconds: 60,
+            roundPerSeconds: 10,
             isAllowRoundFail: false,
             isContinuousTimer: true,
             sceneIndex: 1
         });
         this.anims.create({
             key: 'success_preview_anim',
-            frames: this.anims.generateFrameNumbers('game1_success_preview', { start: 0, end: 125 }),
+            frames: this.anims.generateFrameNumbers('game1_success_preview', { start: 0, end: 48 }),
             framerate: 30,
             repeat: -1
         });
@@ -188,32 +189,47 @@ export class GameScene_1 extends BaseGameScene {
         }
     }
 
-    playFeedback(isSuccess, onComplete) {
+    onRoundWin() {
+        if (!this.isGameActive || this.gameState === 'gameWin') return;
+
+        let isFinalWin = (this.roundIndex + 1 >= this.targetRounds) || this.isAllowRoundFail;
+        this.gameState = isFinalWin ? 'gameWin' : 'roundWin';
+
+        this.gameTimer.stop();
+        this._calculateTiming(isFinalWin);
+        this.enableGameInteraction(false);
+        this.updateRoundUI(true);
+
+        // Feedback Visuals
+        this.showFeedbackLabel(true);
+        this.showBubble('win', this.playerGender);
+        this.playFeedback();
+    }
+
+    playFeedback() {
         this.puzzleGroup.setVisible(false);
         if (this.successVideo) this.successVideo.destroy();
 
         this.previewSprite = this.add.sprite(960, 440,
             'game1_success_preview').setDepth(1000).setScale(2);
         this.previewSprite.play('success_preview_anim');
-
-
-        this.time.delayedCall(500, () => {
-            if (onComplete) onComplete();
-        });
     }
 
-    /**
-     * 最終獲勝面板
-     */
     showWin() {
-        this.puzzleGroup.setVisible(false);
-
-        this.time.delayedCall(1000, () => {
-            const objectPanel = new CustomSinglePanel(this, 960, 600, 'game1_object_description');
-            objectPanel.setDepth(1000).setVisible(true);
-            objectPanel.setCloseCallBack(() => GameManager.backToMainStreet(this));
-        });
+        this.showObjectPanel();
     }
+
+    showObjectPanel() {
+        const objectPanel = new CustomPanel(this, 960, 600, [{
+            content: 'game1_object_description',
+            closeBtn: 'close_btn',
+            closeBtnClick: 'close_btn_click'
+        }]);
+        objectPanel.setDepth(1000);
+        objectPanel.show();
+        objectPanel.setCloseCallBack(() => GameManager.backToMainStreet(this));
+    }
+
 
     /**
      * 重置每一局的拼圖狀態
@@ -221,7 +237,6 @@ export class GameScene_1 extends BaseGameScene {
     resetForNewRound() {
         this.puzzleGroup.setVisible(true);
         this.puzzleGroup.getChildren().forEach(p => p.setData('isCorrect', false));
-        this.previewSprite.destroy();
         this.randomPuzzlePosition(this.puzzleGroup.getChildren());
     }
 
