@@ -12,37 +12,37 @@ export class GameScene_7 extends BaseGameScene {
     preload() {
         const path = 'assets/images/Game_7/';
         const player = JSON.parse(localStorage.getItem('player') || '{"gender":"M"}');
-        this.genderKey = player.gender === 'M' ? 'boy' : 'girl';
+
+        this.gender = 'M';
+        if (localStorage.getItem('player')) {
+            this.gender = JSON.parse(localStorage.getItem('player')).gender;
+        }
+        if (this.gender === 'M') {
+            this.load.video('game7_success', `${path}game7_success_bg_boy.mp4`);
+            this.load.image('game7_npc_box_win1', `${path}game7_npc_box5_boy.png`);
+            this.load.image('game7_npc_box_win2', `${path}game7_npc_box6_boy.png`);
+
+        } else {
+            this.load.video('game7_success', `${path}game7_success_bg_girl.mp4`);
+            this.load.image('game7_npc_box_win1', `${path}game7_npc_box5_girl.png`);
+            this.load.image('game7_npc_box_win2', `${path}game7_npc_box6_girl.png`);
+        }
+
+        this.load.image('game1_npc_box_win', `${path}game7_npc_box4.png`);
+        this.load.image('game7_npc_box_tryagain', `${path}game7_npc_box_7.png`);
+
 
         this.load.image('confirm_button', `${path}game7_confirm_button.png`);
         this.load.image('confirm_button_select', `${path}game7_confirm_button_select.png`);
 
+        this.load.video('game7_fail', `${path}game7_fail_bg.mp4`)
 
-        for (let i = 1; i <= 6; i++) {
-            this.load.image(`game7_answer${i}`, `${path}game7_answer${i}.png`);
-            this.load.image(`game7_fill_answer${i}`, `${path}game7_fill_answer${i}.png`);
+        for (let i = 1; i <= 5; i++) {
+            this.load.image(`game7_object${i}`, `${path}game7_object${i}.png`);
+            this.load.image(`game7_object${i}_description`, `${path}game7_object${i}_description.png`);
         }
 
-        this.load.video('game7_final_boybg1', `${path}game7_final_boybg1.webm`);
-        this.load.video('game7_final_boybg2', `${path}game7_final_boybg2.webm`);
-        this.load.video('game7_final_girlbg1', `${path}game7_final_girlbg1.webm`);
-        this.load.video('game7_final_girlbg2', `${path}game7_final_girlbg2.webm`);
-
-        this.load.image('game7_npc_box_intro', `${path}game7_npc_box5.png`);
-
-        this.load.image('game7_npc_box_tryagain', `${path}game7_npc_box8.png`);
-
-        this.load.image('game7_npc_box_win1', `${path}game7_npc_box1.png`);
-        this.load.image('game7_npc_box_win2', `${path}game7_npc_box2.png`);
-
-        this.load.image('game7_boy_feedback', `${path}game7_npc_boy_box6.png`);
-        this.load.image('game7_girl_feedback', `${path}game7_npc_girl_box6.png`);
-        this.load.image('game7_npc_box_feedback', `${path}game7_npc_box7.png`);
-
-        this.load.image('final_preview', `${path}game7_final_preview.png`);
-        this.load.image('select_area', `${path}game7_select_area.png`);
-        this.load.image('game7_border', `${path}game7_border.png`);
-
+        this.load.image('game7_final_preview', `${path}game7_final_preview.png`);
 
     }
 
@@ -337,7 +337,7 @@ export class GameScene_7 extends BaseGameScene {
     }
 
     playVideoFeedback() {
-        this.video = this.add.video(this.centerX, this.centerY, `game7_final_${this.genderKey}bg2`).setDepth(100);
+        this.video = this.add.video(this.centerX, this.centerY, `game7_success`).setDepth(100);
         this.video.play(true);
 
         this.time.delayedCall(500, () => {
@@ -346,12 +346,12 @@ export class GameScene_7 extends BaseGameScene {
 
             this.feedback2.on('pointerdown', () => {
                 this.feedback2.destroy();
-                this.showObjectPanel();
+                this.showFinalPanel();
             });
         });
     }
 
-    showObjectPanel() {
+    showFinalPanel() {
         const objectPanel = new CustomPanel(this, 960, 600, [{
             content: 'final_preview',
             closeBtn: 'close_btn',
