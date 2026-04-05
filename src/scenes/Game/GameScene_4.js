@@ -19,7 +19,7 @@ export class GameScene_4 extends BaseGameScene {
 
         this.load.image('game4_npc_box_mainstreet', `${path}game4_npc_box1.png`);
         this.load.image('game4_npc_box_win', `${path}game4_npc_box2.png`);
-        this.load.image('game4_npc_box_tryagain', `${path}game4_npc_box2.png`);
+        this.load.image('game4_npc_box_tryagain', `${path}game4_npc_box3.png`);
 
         for (let i = 1; i <= 9; i++) {
             this.load.image(`game4_card${i}`, `${path}game4_card${i}.png`);
@@ -47,8 +47,6 @@ export class GameScene_4 extends BaseGameScene {
     }
 
     setupGameObjects() {
-
-        this.currentFailChance = 0;
         this.isChecked = false; // Reset checking flag
         const centerX = this.cameras.main.width / 2;
         const centerY = this.cameras.main.height / 2;
@@ -144,6 +142,9 @@ export class GameScene_4 extends BaseGameScene {
             }
         });
         this.confirm_button.setActive(enable);
+        if (enable) {
+            this.isChecked = false;
+        }
     }
 
     checkSnap(card) {
@@ -167,7 +168,7 @@ export class GameScene_4 extends BaseGameScene {
                     card.clearTint();
                 }
             }
-            console.log('Target Position -', pos.id, ',current card', pos.occupiedBy ? pos.occupiedBy.texture.key : 'none');
+            //console.log('Target Position -', pos.id, ',current card', pos.occupiedBy ? pos.occupiedBy.texture.key : 'none');
         });
     }
 
@@ -183,9 +184,19 @@ export class GameScene_4 extends BaseGameScene {
     checkAllDone() {
         console.log('Checking all cards...');
         let allCorrect = true;
+
+        // Cards 6 and 7 are interchangeable (same word)
+        const interchangeable = ['game4_card6', 'game4_card7'];
+
         this.defaultCards.forEach(cardInfo => {
             if (cardInfo.occupiedBy) {
-                if (cardInfo.content === cardInfo.occupiedBy.texture.key) {
+                const placedKey = cardInfo.occupiedBy.texture.key;
+                const targetKey = cardInfo.content;
+
+                // Check if this slot allows interchangeable cards
+                if (interchangeable.includes(targetKey) && interchangeable.includes(placedKey)) {
+                    cardInfo.occupiedBy.setData('isCorrect', true);
+                } else if (targetKey === placedKey) {
                     cardInfo.occupiedBy.setData('isCorrect', true);
                 } else {
                     cardInfo.occupiedBy.setData('isCorrect', false);
@@ -238,6 +249,7 @@ export class GameScene_4 extends BaseGameScene {
             pos.occupiedBy = null;
         });
         this.isChecked = false;
+        this.enableGameInteraction(true);
     }
 
 
