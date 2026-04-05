@@ -295,6 +295,36 @@ export class GameScene_7 extends BaseGameScene {
 
     }
 
+    onWinBubbleClose() {
+
+        const dialogY = this.cameras.main.height * 0.8;
+        this.dialog1 = this.add.image(960, dialogY, 'game7_npc_box_win1').setDepth(555);
+        this.dialog1.setInteractive(
+            { useHandCursor: true }
+        );
+        this.dialog1.once('pointerdown', () => {
+            this.dialog1.destroy();
+            this.dialog2 = this.add.image(960, dialogY, 'game7_npc_box_win2').setDepth(555);
+            this.dialog2.setInteractive({ useHandCursor: true });
+            this.dialog2.once('pointerdown', () => {
+                this.showWinPanel();
+            });
+        });
+    }
+
+    showWinPanel() {
+        const winPanel = new CustomPanel(this, 960, 540, [{
+            content: 'game7_final_preview',
+            closeBtn: 'close_btn',
+            closeBtnClick: 'close_btn_click'
+        }]);
+        winPanel.setDepth(1000);
+        winPanel.show();
+        winPanel.setCloseCallBack(
+            () => GameManager.switchToGameScene(this, 'GameResultScene')
+        );
+    }
+
     resetForNewRound() {
         if (this.video) this.video.destroy();
         if (this.label) { this.label.destroy(); this.label = null; }
