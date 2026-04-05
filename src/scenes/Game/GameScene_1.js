@@ -44,7 +44,7 @@ export class GameScene_1 extends BaseGameScene {
     create() {
         this.initGame('game1_bg', 'game1_description', false, false, {
             targetRounds: 1,
-            roundPerSeconds: 10,
+            roundPerSeconds: 60,
             isAllowRoundFail: false,
             isContinuousTimer: true,
             sceneIndex: 1
