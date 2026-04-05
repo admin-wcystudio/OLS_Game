@@ -17,239 +17,201 @@ export class GameScene_4 extends BaseGameScene {
         this.centerX = this.width / 2;
         this.centerY = this.height / 2;
 
-        this.load.image('game4_npc_box_intro', `${path}game4_npc_box5.png`);
-        this.load.image('game4_npc_box_win', `${path}game4_npc_box3.png`);
-        this.load.image('game4_npc_box_tryagain', `${path}game4_npc_box4.png`);
+        this.load.image('game4_npc_box_mainstreet', `${path}game4_npc_box1.png`);
+        this.load.image('game4_npc_box_win', `${path}game4_npc_box2.png`);
+        this.load.image('game4_npc_box_tryagain', `${path}game4_npc_box2.png`);
 
-        this.load.image('game4_hit_button', `${path}game4_click_button.png`);
-        this.load.image('game4_hit_button_select', `${path}game4_click_button_select.png`);
-        this.load.image('game4_target_arrow', `${path}game4_arrow.png`);
-
-        for (let i = 1; i <= 3; i++) {
-            this.load.image(`game4_q${i}`, `${path}game4_q${i}.png`);
-            this.load.image(`game4_q${i}_bar`, `${path}game4_q${i}_bar.png`);
+        for (let i = 1; i <= 9; i++) {
+            this.load.image(`game4_card${i}`, `${path}game4_card${i}.png`);
         }
+
+        this.load.image(`game4_card_bg`, `${path}game4_card_bg.png`);
+        this.load.image('game4_additions', `${path}game4_additions.png`);
+        this.load.image('game4_object_description', `${path}game4_object_description.png`);
+
+        this.load.image('confirm_button', `${path}game4_confirm_button.png`);
+        this.load.image('confirm_button_select', `${path}game4_confirm_button_select.png`);
 
     }
 
     create() {
-        this.arrow = this.add.image(this.centerX, this.centerY - 100, 'game4_target_arrow')
-            .setDepth(501).setVisible(true);
 
-        this.bar = this.add.image(this.centerX, this.centerY + 100, 'game4_q1_bar')
-            .setDepth(500).setVisible(true);
-
-        this.initGame('game4_bg', 'game4_description', false, false, {
+        this.initGame('game4_bg', 'game4_description', true, false, {
             targetRounds: 3,
             roundPerSeconds: 60,
-            isAllowRoundFail: false,
-            isContinuousTimer: true,
+            isAllowRoundFail: true,
+            isContinuousTimer: false,
             sceneIndex: 4
         });
-
-        this.allowToStart = false;
-
-    }
-
-    update() {
-        if (!this.arrow || this.isHit || !this.allowToStart) return;
-
-        // Bouncing logic
-        this.arrow.x += this.arrowSpeed;
-
-        if (this.arrow.x >= 1580) {
-            this.arrow.x = 1580;
-            this.arrowSpeed = -Math.abs(this.arrowSpeed); // Turn left
-        } else if (this.arrow.x <= 350) {
-            this.arrow.x = 350;
-            this.arrowSpeed = Math.abs(this.arrowSpeed); // Turn right
-        }
     }
 
     setupGameObjects() {
-        this.arrowSpeed = 10; // Initial speed of the arrow
-        this.isHit = false;
-        this.successfulHits = 0; // Track number of successful hits
 
-        // Define success ranges for each bar (min and max x positions)
-        this.hitRanges = [
-            { min: 200, max: 650 },  // Bar 1 success range
-            { min: 1250, max: 1550 },  // Bar 2 success range
-            { min: 650, max: 1050 }   // Bar 3 success range
+        this.currentFailChance = 0;
+        this.isChecked = false; // Reset checking flag
+        const centerX = this.cameras.main.width / 2;
+        const centerY = this.cameras.main.height / 2;
+
+        this.add.image(centerX, centerY, 'game4_card_bg').setDepth(100);
+
+        // Set 9 fixed card spawn positions
+        this.spawnCardPositions = [
+            { x: centerX - 330, y: centerY - 300, },
+            { x: centerX, y: centerY - 220, },
+            { x: centerX + 300, y: centerY - 250, },
+            { x: centerX - 350, y: centerY + 250, },
+            { x: centerX - 20, y: centerY + 220, },
+            { x: centerX + 350, y: centerY + 300, },
+            { x: centerX - 200, y: centerY, },
+            { x: centerX + 200, y: centerY, },
+            { x: centerX, y: centerY + 50, }
         ];
 
-        this.hitButton = new CustomButton(this, 1720, 880,
-            'game4_hit_button', 'game4_hit_button_select',
-            () => this.handleHitButtonClick()
-        )
-            .setDepth(502);
+        this.defaultCards = [
+            { id: 1, content: 'game4_card1', targetX: centerX - 530, targetY: centerY, occupiedBy: null },
+            { id: 2, content: 'game4_card2', targetX: centerX - 325, targetY: centerY, occupiedBy: null },
+            { id: 3, content: 'game4_card3', targetX: centerX - 120, targetY: centerY, occupiedBy: null },
+            { id: 4, content: 'game4_card4', targetX: centerX + 85, targetY: centerY, occupiedBy: null },
+            { id: 5, content: 'game4_card5', targetX: centerX + 290, targetY: centerY, occupiedBy: null },
+            { id: 6, content: 'game4_card6', targetX: centerX + 495, targetY: centerY, occupiedBy: null },
+            { id: 7, content: 'game4_card7', targetX: centerX + 700, targetY: centerY, occupiedBy: null },
+            { id: 8, content: 'game4_card8', targetX: centerX + 905, targetY: centerY, occupiedBy: null },
+            { id: 9, content: 'game4_card9', targetX: centerX + 1110, targetY: centerY, occupiedBy: null }
+        ];
 
-        // Add hover effect to hit button
-        this.hitButton.on('pointerover', () => {
-            this.hitButton.setTexture('game4_hit_button_select');
-        });
+        this.cardGroup = this.add.group();
 
-        this.hitButton.on('pointerout', () => {
-            this.hitButton.setTexture('game4_hit_button');
-        });
-    }
-
-    handleHitButtonClick() {
-        if (this.isHit || !this.isGameActive) return; // Prevent multiple clicks
-
-        this.isHit = true;
-        this.arrowSpeed = 0;
-        this.hitButton.setTexture('game4_hit_button'); // Reset button texture on click
-        this.checkHitSuccess();
-    }
-
-    checkHitSuccess() {
-        const currentBarIndex = this.successfulHits; // 0, 1, or 2
-        const range = this.hitRanges[currentBarIndex];
-        const arrowX = this.arrow.x;
-
-        console.log(`Arrow at x=${arrowX}, Range: ${range.min}-${range.max}`);
-
-        // Check if arrow is within the success range
-        if (arrowX >= range.min && arrowX <= range.max) {
-            this.onRoundWin();
-        } else {
-            console.log('Hit failed - outside range');
-            // Update roundIndex to current attempt so correct UI element is marked as failed
-            this.roundIndex = this.successfulHits;
-            this.time.delayedCall(500, () => {
-                this.handleLose();
+        // Shuffle spawn positions for initial spawn
+        const shuffledPositions = Phaser.Utils.Array.Shuffle([...this.spawnCardPositions]);
+        this.defaultCards.forEach((cardInfo, i) => {
+            const spawnPos = shuffledPositions[i % shuffledPositions.length];
+            const card = this.add.image(spawnPos.x, spawnPos.y, cardInfo.content);
+            card.setData({ targetX: cardInfo.targetX, targetY: cardInfo.targetY, isCorrect: false });
+            card.on('pointerdown', () => {
+                this.selectCard(card);
             });
+            this.cardGroup.add(card);
+            card.setDepth(10);
+        });
+
+        this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+            if (this.selectedCard !== gameObject) this.selectCard(gameObject);
+            gameObject.setPosition(dragX, dragY).setDepth(100);
+        });
+
+        this.input.on('dragend', (pointer, gameObject) => {
+            gameObject.setDepth(50);
+            // Log the texture key (name) of the gameObject
+            this.checkSnap(gameObject);
+        });
+
+        this.confirm_button = new CustomButton(this, centerX + 800, centerY + 400,
+            'confirm_button', 'confirm_button_select',
+            () => {
+                if (this.isChecked) return;
+                this.checkAllDone();
+                this.isChecked = true;
+            }, () => { });
+        this.confirm_button.setActive(false);
+
+        this.confirm_button.setDepth(100);
+
+        //==== Debug Graphics ===========================================================
+        const debugGraphics = this.add.graphics().setDepth(this.depth + 2); // 擺喺背景上面，物件下面
+        debugGraphics.lineStyle(4, 0xff0000, 1); // 紅色線，粗度 2
+
+        const tolerance = 60; // 同你 checkSnap 裡面個數值一樣
+        this.defaultCards.forEach(data => {
+            debugGraphics.lineStyle(3, 0x00ff00, 0.5); // 綠色虛線感
+            debugGraphics.strokeCircle(data.targetX, data.targetY, tolerance);
+        });
+    }
+    selectCard(card) {
+        if (this.selectedCard) {
+            this.selectedCard.clearTint();
         }
+        this.selectedCard = card;
+        this.selectedCard.setTint(0xaaaaaa);
     }
 
-    /**
-     * Override: Called when a round/game is won
-     */
-    onRoundWin() {
-        if (!this.isGameActive || this.gameState === 'gameWin') return;
+    enableGameInteraction(enable) {
+        this.cardGroup.getChildren().forEach(card => {
+            if (enable) {
+                card.setInteractive({ draggable: true });
+            } else {
+                card.disableInteractive();
+            }
+        });
+        this.confirm_button.setActive(enable);
+    }
 
-        // Increment successful hits
-        this.successfulHits++;
-        console.log(`Hit ${this.successfulHits}/3 successful!`);
-
-        // Sync roundIndex with successfulHits for proper round UI update
-        this.roundIndex = this.successfulHits - 1;
-
-        // Determine if this is the last round (3rd successful hit)
-        let isGameWin = (this.successfulHits >= this.targetRounds);
-        console.log('遊戲狀態改為:', isGameWin ? 'gameWin' : 'roundWin');
-
-        this.gameState = isGameWin ? 'gameWin' : 'roundWin';
-
-        if (this.gameTimer) this.gameTimer.stop();
-
-        if (this.gameTimer && typeof this.gameTimer.getRemaining === 'function') {
-            if (this.isContinuousTimer) {
-                if (isGameWin) {
-                    this.totalUsedSeconds = Math.max(0, this.roundPerSeconds - this.gameTimer.getRemaining());
+    checkSnap(card) {
+        // Find the nearest unoccupied card position within threshold
+        const threshold = 60;
+        let nearest = null;
+        let minDist = Infinity;
+        this.defaultCards.forEach(pos => {
+            if (!pos.occupiedBy) {
+                const d = Phaser.Math.Distance.Between(card.x, card.y, pos.targetX, pos.targetY);
+                if (d < threshold && d < minDist) {
+                    minDist = d;
+                    nearest = pos;
+                    card.setPosition(pos.targetX, pos.targetY);
+                    pos.occupiedBy = card;
+                    card.clearTint();
                 }
             } else {
-                const used = Math.max(0, this.roundPerSeconds - this.gameTimer.getRemaining());
-                this.totalUsedSeconds += used;
+                if (pos.occupiedBy === card) {
+                    pos.occupiedBy = null;
+                    card.clearTint();
+                }
             }
-        }
-
-        this.enableGameInteraction(false);
-        this.updateRoundUI(true);
-
-        // Show feedback and bubble
-        if (isGameWin) {
-
-            this.label = this.add.image(1650, 350, 'game_success_label').setDepth(555);
-            this.showBubble('win', this.playerGender);
-        } else {
-
-            this.showBubble('noBubble', this.playerGender);
-        }
+            //console.log('Target Position -', pos.id, ',current card', pos.occupiedBy ? pos.occupiedBy.texture.key : 'none');
+        });
     }
 
-    /**
-     * Override: Called when win bubble is closed - moves to next bar or ends game
-     */
-    onWinBubbleClose() {
-        if (!this.isGameActive) return;
-
-        if (this.gameState === 'roundWin') {
-            // For round win, move to next bar instead of nextRound()
-            this.time.delayedCall(500, () => {
-                this.nextBar();
-            });
-
-        } else if (this.gameState === 'gameWin') {
-            // Save game result
-            if (this.sceneIndex > 0) {
-                GameManager.saveGameResult(this.sceneIndex, true, this.totalUsedSeconds);
-                console.log(`遊戲 ${this.sceneIndex} 結束，總用時: ${this.totalUsedSeconds} 秒`);
-            }
-            this.showWin();
-            this.isGameActive = false;
-            this.gameState = 'completed';
-        }
+    randomCardPosition(cards) {
+        // Shuffle spawn positions
+        const shuffledPositions = Phaser.Utils.Array.Shuffle([...this.spawnCardPositions]);
+        cards.forEach((card, i) => {
+            const pos = shuffledPositions[i % shuffledPositions.length];
+            card.setPosition(pos.x, pos.y);
+        });
     }
 
-    nextBar() {
-        // Reset for next round
-        this.isHit = false;
-        this.arrow.x = this.centerX;
-        this.arrowSpeed = 10;
-
-        // Update bar image for next question
-        const barKeys = ['game4_q1_bar', 'game4_q2_bar', 'game4_q3_bar'];
-        this.bar.setTexture(barKeys[this.successfulHits]);
-
-        console.log(`Moving to bar ${this.successfulHits + 1}`);
-
-        // Clear feedback label
-        if (this.feedbackLabel) {
-            this.feedbackLabel.destroy();
-            this.feedbackLabel = null;
-        }
-
-        // Re-enable interaction and continue playing
-        this.gameState = 'playing';
-        this.isGameActive = true;
-        this.enableGameInteraction(true);
-
-        // Resume timer if continuous
-        if (this.gameTimer && this.isContinuousTimer) {
-            this.gameTimer.start();
-        }
-    }
-
-    resetForNewRound() {
-        // Reset game state
-        this.isHit = false;
-        this.successfulHits = 0;
-        this.arrowSpeed = 10;
-
-        if (this.arrow) {
-            this.arrow.x = this.centerX;
-        }
-
-        if (this.bar) {
-            this.bar.setTexture('game4_q1_bar');
-        }
-    }
-
-    enableGameInteraction(enabled) {
-        if (this.hitButton) {
-            if (enabled) {
-                this.hitButton.setInteractive();
+    checkAllDone() {
+        let allCorrect = true;
+        this.defaultCards.forEach(cardInfo => {
+            if (cardInfo.occupiedBy) {
+                if (cardInfo.content === cardInfo.occupiedBy.texture.key) {
+                    cardInfo.occupiedBy.setData('isCorrect', true);
+                } else {
+                    cardInfo.occupiedBy.setData('isCorrect', false);
+                    allCorrect = false;
+                }
             } else {
-                this.hitButton.disableInteractive();
+                allCorrect = false;
             }
+        });
+
+        if (allCorrect) {
+            this.handleWinBeforeBubble();
+        } else {
+            this.handleLose();
         }
-        this.allowToStart = enabled;
+
     }
 
     showWin() {
-        this.showObjectPanel();
+        this.cardGroup.setVisible(false);
+        this.confirm_button.setVisible(false);
+        this.addOnImg = this.add.image(960, 600, 'game4_additions')
+            .setInteractive({ useHandCursor: true }).setDepth(557);
+
+        this.addOnImg.setVisible(true);
+        this.addOnImg.once('pointerdown', () => {
+            this.showObjectPanel();
+        });
     }
 
     showObjectPanel() {
@@ -262,6 +224,20 @@ export class GameScene_4 extends BaseGameScene {
         objectPanel.show();
         objectPanel.setCloseCallBack(() => GameManager.backToMainStreet(this));
     }
+
+    resetForNewRound() {
+        this.randomCardPosition(this.cardGroup.getChildren());
+        this.cardGroup.setVisible(true);
+
+        this.cardGroup.getChildren().forEach(card => {
+            card.setData('isCorrect', false);
+        });
+        this.defaultCards.forEach(pos => {
+            pos.occupiedBy = null;
+        });
+        this.isChecked = false;
+    }
+
 
 
 }
