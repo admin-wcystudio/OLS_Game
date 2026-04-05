@@ -26,13 +26,6 @@ export class GameScene_3 extends BaseGameScene {
         this.load.image('game3_npc_box_tryagain', `${path}game3_npc_box3.png`);
         this.load.image('game3_select_area', `${path}game3_select_area.png`);
 
-
-        this.load.image(`game3_q1_fill_correct_answer1`, `${path}game3_q1_fill_correct_answer1.png`);
-        this.load.image(`game3_q1_fill_correct_answer2`, `${path}game3_q1_fill_correct_answer2.png`);
-        this.load.image(`game3_q1_fill_fail_answer1`, `${path}game3_q1_fill_fail_answer1.png`);
-        this.load.image(`game3_q1_fill_fail_answer2`, `${path}game3_q1_fill_fail_answer2.png`);
-
-
         for (let i = 1; i <= 3; i++) {
             this.load.image(`game3_q${i}`, `${path}game3_q${i}.png`);
             this.load.image(`game3_q${i}_correct_answer1`, `${path}game3_q${i}_correct_answer1.png`);
@@ -68,7 +61,7 @@ export class GameScene_3 extends BaseGameScene {
         this.currentIndex = 1;
 
         // Now call initGame which will call setupGameObjects
-        this.initGame('game3_bg', 'game3_description', true, true, {
+        this.initGame('game3_bg', 'game3_description', true, false, {
             targetRounds: 3,
             roundPerSeconds: 120,
             isAllowRoundFail: false,
@@ -90,19 +83,6 @@ export class GameScene_3 extends BaseGameScene {
                 this.checkAnswer();
             });
         this.confirmBtn.setDepth(200).setVisible(true);
-
-        // Debug: spawn positions (red)
-        const debugGraphics = this.add.graphics().setDepth(200);
-        debugGraphics.lineStyle(3, 0xff0000, 1);
-        debugGraphics.fillStyle(0xff0000, 0.3);
-        this.spawnPositions.forEach((pos, index) => {
-            const radius = 40;
-            debugGraphics.strokeCircle(pos.x, pos.y, radius);
-            debugGraphics.fillCircle(pos.x, pos.y, radius);
-            this.add.text(pos.x + radius + 5, pos.y - 10, `spawn[${index}]`, {
-                fontSize: '18px', fill: '#ff0000'
-            }).setDepth(201);
-        });
 
         this.choices = [
             {
@@ -127,36 +107,32 @@ export class GameScene_3 extends BaseGameScene {
                 q: 1,
                 fillPositions: [
                     { x: 850, y: 580, targetKey: 'game3_q1_correct_answer1' },
-                    { x: 1150, y: 580, targetKey: 'game3_q1_correct_answer2' }
+                    { x: 1120, y: 580, targetKey: 'game3_q1_correct_answer2' }
                 ]
             },
             {
                 q: 2,
                 fillPositions: [
-                    { x: 950, y: 580, targetKey: 'game3_q2_correct_answer1' }
+                    { x: 1050, y: 580, targetKey: 'game3_q2_correct_answer1' }
                 ]
             },
             {
                 q: 3,
                 fillPositions: [
-                    { x: 950, y: 580, targetKey: 'game3_q3_correct_answer1' }
+                    { x: 1050, y: 580, targetKey: 'game3_q3_correct_answer1' }
                 ]
             }
         ];
 
-        // Debug: fill positions (cyan)
-        const fillDebugGraphics = this.add.graphics().setDepth(202);
-        fillDebugGraphics.lineStyle(3, 0x00ffff, 1);
-        fillDebugGraphics.fillStyle(0x00ffff, 0.3);
         const currentFillPositions = this.targetContents[this.currentIndex - 1].fillPositions;
-        currentFillPositions.forEach((slot, index) => {
-            const radius = 40;
-            fillDebugGraphics.strokeCircle(slot.x, slot.y, radius);
-            fillDebugGraphics.fillCircle(slot.x, slot.y, radius);
-            this.add.text(slot.x + radius + 5, slot.y - 10, `fill[${index}]\n${slot.targetKey}`, {
-                fontSize: '14px', fill: '#00ffff'
-            }).setDepth(203);
-        });
+        // currentFillPositions.forEach((slot, index) => {
+        //     const radius = 60;
+        //     fillDebugGraphics.strokeCircle(slot.x, slot.y, radius);
+        //     fillDebugGraphics.fillCircle(slot.x, slot.y, radius);
+        //     this.add.text(slot.x + radius + 5, slot.y - 10, `fill[${index}]\n${slot.targetKey}`, {
+        //         fontSize: '14px', fill: '#00ffff'
+        //     }).setDepth(203);
+        // });
 
         // Build answerKey → fillAnswerKey lookup
         const choice = this.choices[this.currentIndex - 1];
@@ -223,8 +199,30 @@ export class GameScene_3 extends BaseGameScene {
 
             if (nearest) {
                 nearest.occupiedBy = answerKey;
-                nearest.snapImage = this.add.image(nearest.x, nearest.y, fillKey).setDepth(200);
+                nearest.snapImage = this.add.image(nearest.x, nearest.y, fillKey)
+                    .setDepth(200)
+                    .setInteractive({ useHandCursor: true });
+
+                // Store reference to original image for later restoration
+                nearest.originalImage = gameObject;
                 gameObject.setVisible(false).disableInteractive();
+
+                // Click on placed answer to remove it and restore original
+                nearest.snapImage.once('pointerdown', () => {
+                    // Restore original image to spawn position
+                    gameObject.setVisible(true);
+                    gameObject.setInteractive({ draggable: true, useHandCursor: true });
+                    gameObject.setPosition(
+                        gameObject.getData('originX'),
+                        gameObject.getData('originY')
+                    ).setDepth(200);
+
+                    // Clear slot
+                    nearest.snapImage.destroy();
+                    nearest.snapImage = null;
+                    nearest.occupiedBy = null;
+                    nearest.originalImage = null;
+                });
             } else {
                 gameObject.setPosition(
                     gameObject.getData('originX'),
@@ -247,16 +245,19 @@ export class GameScene_3 extends BaseGameScene {
     onRoundWin() {
         if (!this.isGameActive || this.gameState === 'gameWin') return;
 
-        let isFinalWin = (this.currentIndex + 1 >= this.targetRounds) || this.isAllowRoundFail;
+        let isFinalWin = (this.currentIndex == this.targetRounds);
         this.gameState = isFinalWin ? 'gameWin' : 'roundWin';
 
-        this.gameTimer.stop();
-        this._calculateTiming(isFinalWin);
-        this.enableGameInteraction(false);
-        this.updateRoundUI(true);
+        // Sync roundIndex with currentIndex for UI updates
+        this.roundIndex = this.currentIndex - 1;
 
-        // Feedback Visuals
-        this.showFeedbackLabel(true);
+        if (isFinalWin) {
+            this.gameTimer.stop();
+            this._calculateTiming(isFinalWin);
+            this.enableGameInteraction(false);
+            this.showFeedbackLabel(true);
+        }
+        this.updateRoundUI(true);
         this.showDescriptionPanel();
     }
 
@@ -278,4 +279,51 @@ export class GameScene_3 extends BaseGameScene {
         });
     }
 
+    enableGameInteraction(enabled) {
+        if (!this.answerImages) return;
+        this.answerImages.forEach(img => {
+            if (!img.active) return;
+            if (enabled) {
+                img.setInteractive({ draggable: true, useHandCursor: true });
+            } else {
+                img.disableInteractive();
+            }
+        });
+        if (this.confirmBtn) this.confirmBtn.setVisible(enabled);
+    }
+
+    resetForNewRound() {
+        // Destroy question image
+        if (this.questionImage) { this.questionImage.destroy(); this.questionImage = null; }
+
+        // Destroy confirm button
+        if (this.confirmBtn) { this.confirmBtn.destroy(); this.confirmBtn = null; }
+
+        // Destroy answer images
+        if (this.answerImages) {
+            this.answerImages.forEach(img => img.destroy());
+            this.answerImages = [];
+        }
+
+        // Destroy fill slot hint/snap images
+        if (this.fillSlots) {
+            this.fillSlots.forEach(slot => {
+                if (slot.hintImage) slot.hintImage.destroy();
+                if (slot.snapImage) slot.snapImage.destroy();
+            });
+            this.fillSlots = [];
+        }
+
+        this.setupGameObjects();
+
+        // Reset game state for new round
+        this.gameState = 'playing';
+        this.isGameActive = true;
+        this.gameTimer.start();
+        this.enableGameInteraction(true);
+    }
+
+    onWinBubbleClose() {
+        GameManager.backToMainStreet(this);
+    }
 }
