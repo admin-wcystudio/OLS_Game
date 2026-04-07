@@ -35,6 +35,7 @@ class BaseButton extends Phaser.GameObjects.Image {
         if (!this.input?.enabled) return;
 
         this.playButtonClick();
+        this.isHeldDown = true;
 
         if (this.needClicked) {
             this.isClicked = !this.isClicked;
@@ -53,6 +54,7 @@ class BaseButton extends Phaser.GameObjects.Image {
 
     handleUp() {
         if (!this.input?.enabled) return;
+        this.isHeldDown = false;
         if (!this.needClicked) {
             this.setNormalState();
             this.cbUp();
@@ -61,6 +63,9 @@ class BaseButton extends Phaser.GameObjects.Image {
 
     handleOver() {
         if (!this.input?.enabled || this.isClicked) return;
+
+        this.setPressedState();
+
         // Subtle hover effect: scale up slightly
         this.scene.tweens.add({
             targets: this,
@@ -73,10 +78,17 @@ class BaseButton extends Phaser.GameObjects.Image {
         if (!this.input?.enabled) return;
         if (!this.isClicked) {
             this.setNormalState();
+
+            if (!this.needClicked && this.isHeldDown) {
+                this.isHeldDown = false;
+                this.cbUp();
+            }
         }
     }
     setPressedState() {
         if (this.pressedKey) this.setTexture(this.pressedKey);
+
+
 
         // Haptic feel: shrink slightly when pressed
         this.scene.tweens.add({
