@@ -17,8 +17,8 @@ export class GameScene_3 extends BaseGameScene {
         this.centerX = this.width / 2;
         this.centerY = this.height / 2
 
-        this.load.image('confirm_button', `${path}game3_confirm_button.png`);
-        this.load.image('confirm_button_select', `${path}game3_confirm_button_select.png`);
+        this.load.image('game3_confirm_button', `${path}game3_confirm_button.png`);
+        this.load.image('game3_confirm_button_select', `${path}game3_confirm_button_select.png`);
 
 
         this.load.image('game3_npc_box_mainstreet', `${path}game3_npc_box1.png`);
@@ -79,7 +79,7 @@ export class GameScene_3 extends BaseGameScene {
             this.centerY + 50, `game3_q${this.currentIndex}`).setDepth(200);
 
         this.confirmBtn = new CustomButton(this, this.centerX, this.centerY + 450,
-            'confirm_button', 'confirm_button_select', () => {
+            'game3_confirm_button', 'game3_confirm_button_select', () => {
                 this.checkAnswer();
             });
         this.confirmBtn.setDepth(200).setVisible(true);

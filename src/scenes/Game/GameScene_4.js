@@ -29,8 +29,8 @@ export class GameScene_4 extends BaseGameScene {
         this.load.image('game4_additions', `${path}game4_additions.png`);
         this.load.image('game4_object_description', `${path}game4_object_description.png`);
 
-        this.load.image('confirm_button', `${path}game4_confirm_button.png`);
-        this.load.image('confirm_button_select', `${path}game4_confirm_button_select.png`);
+        this.load.image('game4_confirm_button', `${path}game4_confirm_button.png`);
+        this.load.image('game4_confirm_button_select', `${path}game4_confirm_button_select.png`);
 
     }
 
@@ -105,7 +105,7 @@ export class GameScene_4 extends BaseGameScene {
         });
 
         this.confirm_button = new CustomButton(this, centerX + 800, centerY + 400,
-            'confirm_button', 'confirm_button_select',
+            'game4_confirm_button', 'game4_confirm_button_select',
             () => {
                 if (this.isChecked) return;
                 this.checkAllDone();

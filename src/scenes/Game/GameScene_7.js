@@ -34,8 +34,8 @@ export class GameScene_7 extends BaseGameScene {
         this.load.image('game7_npc_box_tryagain', `${path}game7_npc_box7.png`);
 
 
-        this.load.image('confirm_button', `${path}game7_confirm_button.png`);
-        this.load.image('confirm_button_select', `${path}game7_confirm_button_select.png`);
+        this.load.image('game7_confirm_button', `${path}game7_confirm_button.png`);
+        this.load.image('game7_confirm_button_select', `${path}game7_confirm_button_select.png`);
 
         this.load.video('game7_fail', `${path}game7_fail_bg.mp4`)
 
@@ -109,7 +109,7 @@ export class GameScene_7 extends BaseGameScene {
         });
 
         this.confirm_button = new CustomButton(this, centerX + 800, centerY + 400,
-            'confirm_button', 'confirm_button_select',
+            'game7_confirm_button', 'game7_confirm_button_select',
             () => {
                 console.log(' button clicked');
                 if (this.isChecked) return;
