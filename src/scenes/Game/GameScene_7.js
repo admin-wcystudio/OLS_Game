@@ -193,7 +193,7 @@ export class GameScene_7 extends BaseGameScene {
             card.setPosition(nearest.targetX, nearest.targetY);
             nearest.occupiedBy = card;
             card.clearTint();
-            // this.showObjectDescription(card.texture.key);
+            this.showObjectDescription(card.texture.key);
         }
     }
 

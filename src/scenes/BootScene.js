@@ -136,7 +136,8 @@ export class BootScene extends Phaser.Scene {
         for (let i = 1; i <= 7; i++) {
             this.load.image(`game${i}_description`, `assets/images/Game_${i}/game${i}_description.png`);// skip game 5 bg as it is not used
             this.load.image(`game${i}_bg`, `assets/images/Game_${i}/game${i}_bg.png`);
-
+            if (i == 7) continue; // skip game 7 npc bubble as it is not used
+            this.load.image(`game${i}_npc_box_mainstreet`, `assets/images/Game_${i}/game${i}_npc_box1.png`);
         }
 
 
@@ -154,7 +155,7 @@ export class BootScene extends Phaser.Scene {
 
             this.registry.set('globalSettings', settings);
         }
-        this.scene.start('GameScene_4');
+        this.scene.start('MainStreetScene');
     }
 }
 

@@ -80,6 +80,9 @@ export class MainStreetScene extends Phaser.Scene {
             this.load.image(`stage_object_game${i}_select`, `assets/images/MainStreet/NPCs/stage_object_game${i}_select.png`);
         }
 
+        this.load.image(`game7_npc_box_mainstreet_no1`, `assets/images/Game_7/game7_npc_box1.png`);
+        this.load.image(`game7_npc_box_mainstreet_no2`, `assets/images/Game_7/game7_npc_box2.png`);
+        this.load.image(`game7_npc_box_mainstreet`, `assets/images/Game_7/game7_npc_box3.png`);
 
         // // Only load spritesheets for the selected gender
         let gender = 'M';
@@ -219,20 +222,33 @@ export class MainStreetScene extends Phaser.Scene {
         const n1 = NpcHelper.createNpc(this, 1, 1900, 200, 1, 'npc1', 7, 'npc1_anim');
 
         const n1_item = NpcHelper.createNpcItem(this, 1, 1400, 250, 1, 'stage_object_game1', 'stage_object_game1_select', 7);
-
-        const n2_item = NpcHelper.createNpcItem(this, 1, 2200, 350, 1, 'stage_object_game2', 'stage_object_game2_select', 7);
-        const n3_item = NpcHelper.createNpcItem(this, 1, width / 2 + 380, 1050, 1, 'stage_object_game3', 'stage_object_game3_select', 8);
-        const n4_item = NpcHelper.createNpcItem(this, 1, width / 2 + 100, 380, 1, 'stage_object_game4', 'stage_object_game4_select', 8);
-        const n5_item = NpcHelper.createNpcItem(this, 1, 180, 280, 1, 'stage_object_game5', 'stage_object_game5_select', 7);
-        const n6_item = NpcHelper.createNpcItem(this, 1, width / 2 + 380, 1050, 1, 'stage_object_game6', 'stage_object_game6_select', 7);
-        const n7_item = NpcHelper.createNpcItem(this, 1, width / 2 + 950, 650, 1, 'stage_object_game7', 'stage_object_game7_select', 10);
+        const n2_item = NpcHelper.createNpcItem(this, 2, 2200, 350, 1, 'stage_object_game2', 'stage_object_game2_select', 7);
+        const n3_item = NpcHelper.createNpcItem(this, 3, width / 2 + 380, 1100, 1, 'stage_object_game3', 'stage_object_game3_select', 8);
+        const n4_item = NpcHelper.createNpcItem(this, 4, width / 2 + 100, 380, 1, 'stage_object_game4', 'stage_object_game4_select', 8);
+        const n5_item = NpcHelper.createNpcItem(this, 5, 180, 280, 1, 'stage_object_game5', 'stage_object_game5_select', 7);
+        const n6_item = NpcHelper.createNpcItem(this, 6, width / 2 + 380, 1100, 1, 'stage_object_game6', 'stage_object_game6_select', 7);
+        const n7_item = NpcHelper.createNpcItem(this, 7, width / 2 + 950, 650, 1, 'stage_object_game7', 'stage_object_game7_select', 10);
 
         n1_item.setScale(0.8);
         n4_item.setScale(0.9);
         n5_item.setScale(0.9);
         n7_item.setScale(0.9);
 
-        this.interactiveNpcs.push(n1);
+        // Mark pond items (3 and 6) with custom interaction range
+        n3_item.pondInteractRange = { minX: 680, maxX: 1980 };
+        n6_item.pondInteractRange = { minX: 680, maxX: 1980 };
+
+        // Set bubble keys for each NPC item (using game scene naming convention)
+        n1_item.bubbles = ['game1_npc_box_mainstreet'];
+        n2_item.bubbles = ['game2_npc_box_mainstreet'];
+        n3_item.bubbles = ['game3_npc_box_mainstreet'];
+        n4_item.bubbles = ['game4_npc_box_mainstreet'];
+        n5_item.bubbles = ['game5_npc_box_mainstreet'];
+        n6_item.bubbles = ['game6_npc_box_mainstreet'];
+        n7_item.bubbles = ['game7_npc_box_mainstreet'];
+
+        // Add all NPC items to interactive NPCs array
+        this.interactiveNpcs.push(n1_item, n2_item, n3_item, n4_item, n5_item, n6_item, n7_item);
 
         this.currentInteractiveNpc = null;
 
@@ -242,14 +258,31 @@ export class MainStreetScene extends Phaser.Scene {
             this.isRightDown = false;
         });
 
-        const npcGameMap = { 1: 4, 2: 2, 3: 3, 4: 1, 5: 5, 6: 6, 7: 7 };
-        this.interactiveNpcs.forEach((npc, index) => {
+        // Setup hover and click events for NPC items
+        this.interactiveNpcs.forEach((npc) => {
+            // Mouse over - change to select texture when player is close
+            npc.on('pointerover', () => {
+                if (npc.canInteract && npc.glowKey) {
+                    npc.setTexture(npc.glowKey);
+                }
+            });
+
+            // Mouse out - revert to base texture
+            npc.on('pointerout', () => {
+                if (npc.baseKey) {
+                    npc.setTexture(npc.baseKey);
+                }
+            });
+
+            // Click - change to select texture and load bubble
             npc.on('pointerdown', () => {
                 if (npc.canInteract) {
-                    const gameNumber = npcGameMap[npc.id] ?? (index + 1);
+                    if (npc.glowKey) {
+                        npc.setTexture(npc.glowKey);
+                    }
+                    const gameNumber = npc.id;
                     const sceneKey = `GameScene_${gameNumber}`;
-                    const characterbubble = `game${gameNumber}_${genderKey}_bubble`;
-                    this.loadBubble(0, npc.bubbles, sceneKey, npc, characterbubble);
+                    this.loadBubble(0, npc.bubbles, sceneKey, npc);
                 }
             });
         });
@@ -291,6 +324,17 @@ export class MainStreetScene extends Phaser.Scene {
         this.currentNpcActivated = null;
 
         allNpcs.forEach(npc => {
+            // Check for pond items with custom interaction range
+            if (npc.pondInteractRange) {
+                const playerX = this.playerSprite.x;
+                if (playerX >= npc.pondInteractRange.minX && playerX <= npc.pondInteractRange.maxX) {
+                    npc.canInteract = true;
+                } else {
+                    npc.canInteract = false;
+                }
+                return;
+            }
+
             const dist = Math.abs(this.playerSprite.x - npc.x);
 
             if (dist < npc.proximityDistance) {
@@ -298,10 +342,13 @@ export class MainStreetScene extends Phaser.Scene {
                 //  npc.setTint(0x888888);
             } else {
                 npc.canInteract = false;
+                // Revert texture when player leaves proximity
+                if (npc.baseKey) {
+                    npc.setTexture(npc.baseKey);
+                }
                 //  npc.setTint(0xffffff);
-                // IF THIS NPC was the one owning the active bubbles
-                if ((this.currentActiveBubble && this.currentActiveBubble.ownerNpc === npc) ||
-                    (this.characterActiveBubble && this.characterActiveBubble.ownerNpc === npc)) {
+                // IF THIS NPC was the one owning the active bubble
+                if (this.currentActiveBubble && this.currentActiveBubble.ownerNpc === npc) {
 
                     // 1. Clear all pending timers to prevent bubbles "popping up" later
                     this.bubbleTimers.forEach(t => t.remove());
@@ -311,12 +358,6 @@ export class MainStreetScene extends Phaser.Scene {
                     if (this.currentActiveBubble) {
                         this.currentActiveBubble.destroy();
                         this.currentActiveBubble = null;
-                    }
-
-                    // 3. Destroy Character Bubble
-                    if (this.characterActiveBubble) {
-                        this.characterActiveBubble.destroy();
-                        this.characterActiveBubble = null;
                     }
                 }
             }
@@ -348,33 +389,10 @@ export class MainStreetScene extends Phaser.Scene {
     }
 
 
-    loadBubble(index = 0, bubbles, sceneKey, targetNpc, characterbubble) {
-        // Negative = player is left of NPC (facing right); Positive = player is right of NPC (facing left)
-        const facingLeft = (this.playerSprite.x - targetNpc.x) > 0;
-
+    loadBubble(index = 0, bubbles, sceneKey, targetNpc) {
         if (this.currentActiveBubble) {
             this.currentActiveBubble.destroy();
         }
-        if (this.characterActiveBubble) {
-            this.characterActiveBubble.destroy();
-        }
-
-        // Special handling for NPC 5 and 6: Check if Games 1-4 are completed
-        // if (targetNpc.id === 5 || targetNpc.id === 6) {
-        //     const allResults = GameManager.loadGameResult();
-        //     // Check if games 1, 2, 3, and 4 are finished
-        //     const canStartGame = [1, 2, 3, 4].every(num => {
-        //         const res = allResults.find(r => r.game === num);
-        //         return res && res.isFinished;
-        //     });
-
-        //     if (!canStartGame) {
-        //         console.log("Game is locked. Prerequisites (Games 1-4) not met.");
-        //         // Use string arrays directly as the variables are not in scope here
-        //         bubbles = targetNpc.id === 5 ? ['npc5_bubble_reject'] : ['npc6_bubble_reject'];
-        //         sceneKey = null; // Prevent starting the game
-        //     }
-        // }
 
         this.bubbleImg = this.add.image(this.centerX, 900, bubbles[index])
             .setDepth(200)
@@ -385,54 +403,23 @@ export class MainStreetScene extends Phaser.Scene {
         this.bubbleImg.ownerNpc = targetNpc;
         this.currentActiveBubble = this.bubbleImg;
 
-        this.characterBubbleImg = this.add.image(this.centerX, 900, characterbubble)
-            .setDepth(200)
-            .setInteractive({ useHandCursor: true })
-            .setVisible(false)
-            .setScrollFactor(0);
-
-        this.characterActiveBubble = this.characterBubbleImg;
-        this.characterActiveBubble.ownerNpc = targetNpc;
-
-
+        // Click intro bubble to start game directly
         this.bubbleImg.on('pointerdown', () => {
             this.bubbleImg.destroy();
             this.currentActiveBubble = null;
 
-            // Store this timer so we can stop it
-            const timer1 = this.time.delayedCall(500, () => {
-                // IMPORTANT: Check if the player is still "allowed" to see this
-                if (!targetNpc.canInteract) return;
-
-                this.characterBubbleImg.setVisible(true);
-                this.switchTalkingAnimation(this.genderKey, facingLeft);
-
-                this.characterBubbleImg.on('pointerdown', () => {
-                    this.characterBubbleImg.destroy();
-                    this.characterActiveBubble = null;
-
-                    const timer2 = this.time.delayedCall(1000, () => {
-                        if (sceneKey) {
-                            localStorage.setItem('playerPosition', JSON.stringify({ x: this.playerSprite.x, y: this.playerSprite.y }));
-                            GameManager.switchToGameScene(this, sceneKey);
-                        }
-                    });
-                    this.bubbleTimers.push(timer2);
-                });
+            const timer = this.time.delayedCall(500, () => {
+                if (sceneKey) {
+                    localStorage.setItem('playerPosition', JSON.stringify({ x: this.playerSprite.x, y: this.playerSprite.y }));
+                    GameManager.switchToGameScene(this, sceneKey);
+                }
             });
-            this.bubbleTimers.push(timer1);
+            this.bubbleTimers.push(timer);
         });
 
         // 彈出動畫
         this.tweens.add({
             targets: this.bubbleImg,
-            scale: { from: 0.5, to: 1 },
-            duration: 200,
-            ease: 'Back.easeOut'
-        });
-
-        this.tweens.add({
-            targets: this.characterBubbleImg,
             scale: { from: 0.5, to: 1 },
             duration: 200,
             ease: 'Back.easeOut'
@@ -449,85 +436,90 @@ export class MainStreetScene extends Phaser.Scene {
             repeat: -1
         });
 
-        this.anims.create({
-            key: 'npc1_glow_anim',
-            frames: this.anims.generateFrameNumbers('npc1_glow', { start: 0, end: 70 }),
-            frameRate: 30,
-            repeat: -1
-        });
+        // Get gender to only create animations for loaded spritesheets
+        let gender = 'M';
+        try {
+            if (localStorage.getItem('player')) {
+                gender = JSON.parse(localStorage.getItem('player')).gender || 'M';
+            }
+        } catch (e) {
+            gender = 'M';
+        }
 
+        // Player character animations - only create for the loaded gender
+        if (gender === 'M') {
+            this.anims.create({
+                key: 'boy_idle_anim',
+                frames: this.anims.generateFrameNumbers('boy_idle', { start: 0, end: 152 }),
+                frameRate: 24,
+                repeat: -1
+            });
 
-        // Player character animations
+            this.anims.create({
+                key: 'boy_left_talk_anim',
+                frames: this.anims.generateFrameNumbers('boy_left_talk', { start: 0, end: 168 }),
+                frameRate: 24,
+                repeat: -1
+            });
 
-        this.anims.create({
-            key: 'boy_idle_anim',
-            frames: this.anims.generateFrameNumbers('boy_idle', { start: 0, end: 152 }),
-            frameRate: 24,
-            repeat: -1
-        });
+            this.anims.create({
+                key: 'boy_right_talk_anim',
+                frames: this.anims.generateFrameNumbers('boy_right_talk', { start: 0, end: 168 }),
+                frameRate: 24,
+                repeat: -1
+            });
 
-        this.anims.create({
-            key: 'boy_left_talk_anim',
-            frames: this.anims.generateFrameNumbers('boy_left_talk', { start: 0, end: 168 }),
-            frameRate: 24,
-            repeat: -1
-        });
+            this.anims.create({
+                key: 'boy_left_walk_anim',
+                frames: this.anims.generateFrameNumbers('boy_left_walk', { start: 0, end: 48 }),
+                frameRate: 24,
+                repeat: -1
+            });
 
-        this.anims.create({
-            key: 'boy_right_talk_anim',
-            frames: this.anims.generateFrameNumbers('boy_right_talk', { start: 0, end: 168 }),
-            frameRate: 24,
-            repeat: -1
-        });
+            this.anims.create({
+                key: 'boy_right_walk_anim',
+                frames: this.anims.generateFrameNumbers('boy_right_walk', { start: 0, end: 48 }),
+                frameRate: 24,
+                repeat: -1
+            });
+        }
 
-        this.anims.create({
-            key: 'boy_left_walk_anim',
-            frames: this.anims.generateFrameNumbers('boy_left_walk', { start: 0, end: 48 }),
-            frameRate: 24,
-            repeat: -1
-        });
+        if (gender === 'F') {
+            this.anims.create({
+                key: 'girl_idle_anim',
+                frames: this.anims.generateFrameNumbers('girl_idle', { start: 0, end: 152 }),
+                frameRate: 24,
+                repeat: -1
+            });
 
-        this.anims.create({
-            key: 'boy_right_walk_anim',
-            frames: this.anims.generateFrameNumbers('boy_right_walk', { start: 0, end: 48 }),
-            frameRate: 24,
-            repeat: -1
-        });
+            this.anims.create({
+                key: 'girl_left_talk_anim',
+                frames: this.anims.generateFrameNumbers('girl_left_talk', { start: 0, end: 23 }),
+                frameRate: 24,
+                repeat: -1
+            });
 
-        this.anims.create({
-            key: 'girl_idle_anim',
-            frames: this.anims.generateFrameNumbers('girl_idle', { start: 0, end: 152 }),
-            frameRate: 24,
-            repeat: -1
-        });
+            this.anims.create({
+                key: 'girl_right_talk_anim',
+                frames: this.anims.generateFrameNumbers('girl_right_talk', { start: 0, end: 49 }),
+                frameRate: 24,
+                repeat: -1
+            });
 
-        this.anims.create({
-            key: 'girl_left_talk_anim',
-            frames: this.anims.generateFrameNumbers('girl_left_talk', { start: 0, end: 23 }),
-            frameRate: 24,
-            repeat: -1
-        });
+            this.anims.create({
+                key: 'girl_left_walk_anim',
+                frames: this.anims.generateFrameNumbers('girl_left_walk', { start: 0, end: 48 }),
+                frameRate: 24,
+                repeat: -1
+            });
 
-        this.anims.create({
-            key: 'girl_right_talk_anim',
-            frames: this.anims.generateFrameNumbers('girl_right_talk', { start: 0, end: 49 }),
-            frameRate: 24,
-            repeat: -1
-        });
-
-        this.anims.create({
-            key: 'girl_left_walk_anim',
-            frames: this.anims.generateFrameNumbers('girl_left_walk', { start: 0, end: 48 }),
-            frameRate: 24,
-            repeat: -1
-        });
-
-        this.anims.create({
-            key: 'girl_right_walk_anim',
-            frames: this.anims.generateFrameNumbers('girl_right_walk', { start: 0, end: 48 }),
-            frameRate: 10,
-            repeat: -1
-        });
+            this.anims.create({
+                key: 'girl_right_walk_anim',
+                frames: this.anims.generateFrameNumbers('girl_right_walk', { start: 0, end: 48 }),
+                frameRate: 10,
+                repeat: -1
+            });
+        }
     }
 
 }

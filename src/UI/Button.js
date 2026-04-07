@@ -14,6 +14,7 @@ class BaseButton extends Phaser.GameObjects.Image {
         // Configuration
         this.isClicked = false;     // Used for toggle mode
         this.needClicked = false;   // If true, behaves like a checkbox/toggle
+        this.isHeldDown = false;    // Track if button is actively being pressed
         this.sfx = null;            // Placeholder for click sounds
 
         // Add to scene and enable input
@@ -34,6 +35,7 @@ class BaseButton extends Phaser.GameObjects.Image {
         if (!this.input?.enabled) return;
 
         this.playButtonClick();
+        this.isHeldDown = true;
 
         if (this.needClicked) {
             this.isClicked = !this.isClicked;
@@ -52,6 +54,7 @@ class BaseButton extends Phaser.GameObjects.Image {
 
     handleUp() {
         if (!this.input?.enabled) return;
+
         if (!this.needClicked) {
             this.setNormalState();
             this.cbUp();
@@ -73,6 +76,11 @@ class BaseButton extends Phaser.GameObjects.Image {
         if (!this.input?.enabled) return;
         if (!this.isClicked) {
             this.setNormalState();
+            // Call cbUp when pointer leaves while button was held down (drag out)
+            if (!this.needClicked && this.isHeldDown) {
+                this.isHeldDown = false;
+                this.cbUp();
+            }
         }
     }
 
