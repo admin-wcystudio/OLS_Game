@@ -160,10 +160,8 @@ export class GameScene_7 extends BaseGameScene {
                 card.disableInteractive();
             }
         });
-        if (this.confirmBtn) {
-            this.confirm_button.init();
-            this.confirmBtn.setVisible(enabled);
-        }
+        this.confirm_button.init();
+        this.confirm_button.setActive(enable);
         this.cardBg.setVisible(enable);
         if (enable) {
             this.isChecked = false;

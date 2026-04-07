@@ -300,10 +300,8 @@ export class GameScene_3 extends BaseGameScene {
             }
         });
 
-        if (this.confirmBtn) {
-            this.confirm_button.init();
-            this.confirmBtn.setVisible(enabled);
-        }
+        this.confirm_button.init();
+        this.confirmBtn.setVisible(enabled);
     }
 
     resetForNewRound() {
