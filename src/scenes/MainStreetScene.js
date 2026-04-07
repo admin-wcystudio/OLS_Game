@@ -321,7 +321,6 @@ export class MainStreetScene extends Phaser.Scene {
 
 
         const allNpcs = [...this.interactiveNpcs];
-        this.currentNpcActivated = null;
 
         allNpcs.forEach(npc => {
             // Check for pond items with custom interaction range
@@ -358,6 +357,8 @@ export class MainStreetScene extends Phaser.Scene {
                     if (this.currentActiveBubble) {
                         this.currentActiveBubble.destroy();
                         this.currentActiveBubble = null;
+                        // Re-enable all NPC item interactivity
+                        this.interactiveNpcs.forEach(n => n.setInteractive({ useHandCursor: true }));
                     }
                 }
             }
@@ -402,6 +403,10 @@ export class MainStreetScene extends Phaser.Scene {
         // 綁定當前 NPC 到對話框，方便 update 檢查距離
         this.bubbleImg.ownerNpc = targetNpc;
         this.currentActiveBubble = this.bubbleImg;
+        console.log(`Loaded bubble for NPC ${targetNpc.id}: ${bubbles[index]}`);
+
+        // Disable all NPC item interactivity while bubble is showing
+        this.interactiveNpcs.forEach(n => n.disableInteractive());
 
         // Click intro bubble to start game directly
         this.bubbleImg.on('pointerdown', () => {
