@@ -24,6 +24,12 @@ class BaseButton extends Phaser.GameObjects.Image {
         this.setupEvents();
     }
 
+    init() {
+        this.isClicked = false;
+        this.isHeldDown = false;
+        this.setNormalState();
+    }
+
     setupEvents() {
         this.on('pointerdown', this.handleDown, this);
         this.on('pointerup', this.handleUp, this);

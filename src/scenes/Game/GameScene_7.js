@@ -51,7 +51,7 @@ export class GameScene_7 extends BaseGameScene {
     create() {
 
         this.initGame('game7_bg', 'game7_description', true, false, {
-            targetRounds: 1,
+            targetRounds: 3,
             roundPerSeconds: 60,
             isAllowRoundFail: false,
             isContinuousTimer: true,
@@ -160,6 +160,7 @@ export class GameScene_7 extends BaseGameScene {
                 card.disableInteractive();
             }
         });
+        this.confirm_button.init();
         this.confirm_button.setActive(enable);
         this.cardBg.setVisible(enable);
         if (enable) {
@@ -343,6 +344,7 @@ export class GameScene_7 extends BaseGameScene {
         this.gameState = 'playing';
         this.isGameActive = true;
         this.isChecked = false;
+
         this.enableGameInteraction(true);
     }
 

@@ -461,7 +461,12 @@ export default class BaseGameScene extends Phaser.Scene {
         // 6. Call subclass-specific reset
         this.resetForNewRound();
 
-        // 7. Re-show description panel to restart the flow
+        // 7. Re-apply init state after subclass reset (subclass may set gameState to 'playing')
+        this.gameState = 'init';
+        this.isGameActive = false;
+        this.enableGameInteraction(false);
+
+        // 8. Re-show description panel to restart the flow
         if (this.gameUI?.descriptionPanel) {
             this.gameUI.descriptionPanel.show();
             // Set callback to start game when panel is closed (skip intro since already shown)

@@ -299,6 +299,7 @@ export class GameScene_3 extends BaseGameScene {
                 img.disableInteractive();
             }
         });
+        this.confirm_button.init();
         if (this.confirmBtn) this.confirmBtn.setVisible(enabled);
     }
 
