@@ -107,7 +107,7 @@ export class GameScene_3 extends BaseGameScene {
                 q: 1,
                 fillPositions: [
                     { x: 850, y: 580, targetKey: 'game3_q1_correct_answer1' },
-                    { x: 1120, y: 580, targetKey: 'game3_q1_correct_answer2' }
+                    { x: 1125, y: 580, targetKey: 'game3_q1_correct_answer2' }
                 ]
             },
             {
@@ -119,19 +119,29 @@ export class GameScene_3 extends BaseGameScene {
             {
                 q: 3,
                 fillPositions: [
-                    { x: 1050, y: 580, targetKey: 'game3_q3_correct_answer1' }
+                    { x: 980, y: 580, targetKey: 'game3_q3_correct_answer1' }
                 ]
             }
         ];
 
         const currentFillPositions = this.targetContents[this.currentIndex - 1].fillPositions;
+
+        // // Debug graphics for fill positions
+        // if (!this.fillDebugGraphics) {
+        //     this.fillDebugGraphics = this.add.graphics();
+        // }
+        // this.fillDebugGraphics.clear();
+        // this.fillDebugGraphics.setDepth(250);
+        // this.fillDebugGraphics.lineStyle(3, 0x00ff00, 1); // Green border
+        // this.fillDebugGraphics.fillStyle(0x00ff00, 0.3); // Semi-transparent green fill
+
         // currentFillPositions.forEach((slot, index) => {
         //     const radius = 60;
-        //     fillDebugGraphics.strokeCircle(slot.x, slot.y, radius);
-        //     fillDebugGraphics.fillCircle(slot.x, slot.y, radius);
+        //     this.fillDebugGraphics.strokeCircle(slot.x, slot.y, radius);
+        //     this.fillDebugGraphics.fillCircle(slot.x, slot.y, radius);
         //     this.add.text(slot.x + radius + 5, slot.y - 10, `fill[${index}]\n${slot.targetKey}`, {
-        //         fontSize: '14px', fill: '#00ffff'
-        //     }).setDepth(203);
+        //         fontSize: '14px', fill: '#00ffff', backgroundColor: '#000000'
+        //     }).setDepth(251);
         // });
 
         // Build answerKey → fillAnswerKey lookup

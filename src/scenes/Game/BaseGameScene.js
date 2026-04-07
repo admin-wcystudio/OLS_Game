@@ -312,6 +312,7 @@ export default class BaseGameScene extends Phaser.Scene {
             if (isFinalWin) this.totalUsedSeconds = used;
         } else {
             this.totalUsedSeconds += used;
+            if (isFinalWin) return;
             this.gameTimer.reset(this.roundPerSeconds);
         }
     }
