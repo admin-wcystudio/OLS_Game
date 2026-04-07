@@ -299,8 +299,11 @@ export class GameScene_3 extends BaseGameScene {
                 img.disableInteractive();
             }
         });
-        this.confirm_button.init();
-        if (this.confirmBtn) this.confirmBtn.setVisible(enabled);
+
+        if (this.confirmBtn) {
+            this.confirm_button.init();
+            this.confirmBtn.setVisible(enabled);
+        }
     }
 
     resetForNewRound() {
