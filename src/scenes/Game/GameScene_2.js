@@ -69,16 +69,11 @@ export class GameScene_2 extends BaseGameScene {
         this.playerStartX = this.centerX + 50;
         this.playerStartY = 800;
 
-        // Item tracking
-        this.coins = [];
-        this.pens = [];
-        this.collectedPens = 0;
-
         this.initGame('game2_bg', 'game2_description', false, false, {
             targetRounds: 3,
             roundPerSeconds: 60,
-            isAllowRoundFail: true,
-            isContinuousTimer: true,
+            isAllowRoundFail: false,
+            isContinuousTimer: false,
             sceneIndex: 2
         });
 
