@@ -141,7 +141,6 @@ export class GameScene_4 extends BaseGameScene {
                 card.disableInteractive();
             }
         });
-        this.confirm_button.init();
         this.confirm_button.setActive(enable);
         if (enable) {
             this.isChecked = false;

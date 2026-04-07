@@ -160,7 +160,6 @@ export class GameScene_7 extends BaseGameScene {
                 card.disableInteractive();
             }
         });
-        this.confirm_button.init();
         this.confirm_button.setActive(enable);
         this.cardBg.setVisible(enable);
         if (enable) {
