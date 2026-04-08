@@ -235,8 +235,8 @@ export class MainStreetScene extends Phaser.Scene {
         n7_item.setScale(0.9);
 
         // Mark pond items (3 and 6) with custom interaction range
-        n3_item.pondInteractRange = { minX: 680, maxX: 1980 };
-        n6_item.pondInteractRange = { minX: 680, maxX: 1980 };
+        n3_item.pondInteractRange = { minX: 880, maxX: 1680 };
+        n6_item.pondInteractRange = { minX: 880, maxX: 1680 };
 
         // Set bubble keys for each NPC item (using game scene naming convention)
         n1_item.bubbles = ['game1_npc_box_mainstreet'];
