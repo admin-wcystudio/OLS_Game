@@ -221,13 +221,13 @@ export class MainStreetScene extends Phaser.Scene {
 
         const n1 = NpcHelper.createNpc(this, 1, 1900, 200, 1, 'npc1', 7, 'npc1_anim');
 
-        const n1_item = NpcHelper.createNpcItem(this, 1, 1400, 250, 1, 'stage_object_game1', 'stage_object_game1_select', 7).setScrollFactor(0);
-        const n2_item = NpcHelper.createNpcItem(this, 2, 2200, 350, 1, 'stage_object_game2', 'stage_object_game2_select', 7).setScrollFactor(0);
-        const n3_item = NpcHelper.createNpcItem(this, 3, width / 2 + 380, 1100, 1, 'stage_object_game3', 'stage_object_game3_select', 8).setScrollFactor(0);
-        const n4_item = NpcHelper.createNpcItem(this, 4, width / 2 + 100, 380, 1, 'stage_object_game4', 'stage_object_game4_select', 8).setScrollFactor(0);
-        const n5_item = NpcHelper.createNpcItem(this, 5, 180, 280, 1, 'stage_object_game5', 'stage_object_game5_select', 7).setScrollFactor(0);
-        const n6_item = NpcHelper.createNpcItem(this, 6, width / 2 + 380, 1100, 1, 'stage_object_game6', 'stage_object_game6_select', 7).setScrollFactor(0);
-        const n7_item = NpcHelper.createNpcItem(this, 7, width / 2 + 950, 650, 1, 'stage_object_game7', 'stage_object_game7_select', 10).setScrollFactor(0);
+        const n1_item = NpcHelper.createNpcItem(this, 1, 1400, 250, 1, 'stage_object_game1', 'stage_object_game1_select', 7);
+        const n2_item = NpcHelper.createNpcItem(this, 2, 2200, 350, 1, 'stage_object_game2', 'stage_object_game2_select', 7);
+        const n3_item = NpcHelper.createNpcItem(this, 3, width / 2 + 380, 1100, 1, 'stage_object_game3', 'stage_object_game3_select', 8);
+        const n4_item = NpcHelper.createNpcItem(this, 4, width / 2 + 100, 380, 1, 'stage_object_game4', 'stage_object_game4_select', 8);
+        const n5_item = NpcHelper.createNpcItem(this, 5, 180, 280, 1, 'stage_object_game5', 'stage_object_game5_select', 7);
+        const n6_item = NpcHelper.createNpcItem(this, 6, width / 2 + 380, 1100, 1, 'stage_object_game6', 'stage_object_game6_select', 7);
+        const n7_item = NpcHelper.createNpcItem(this, 7, width / 2 + 950, 650, 1, 'stage_object_game7', 'stage_object_game7_select', 10);
 
         n1_item.setScale(0.8);
         n4_item.setScale(0.9);
