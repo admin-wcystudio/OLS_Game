@@ -23,6 +23,7 @@ export class GameScene_5 extends BaseGameScene {
         this.load.image('game5_hard_button_click', `${path}game5_hard_button_select.png`);
         this.load.image('game5_mode_panel', `${path}game5_hardnormal_box.png`);
 
+        this.load.image('game5_object_description', `${path}game5_object_description1.png`);
         this.load.image('game5_object_description1', `${path}game5_object_description1.png`);
         this.load.image('game5_object_description2', `${path}game5_object_description2.png`);
 
