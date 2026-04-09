@@ -23,6 +23,8 @@ export class GameScene_5 extends BaseGameScene {
         this.load.image('game5_hard_button_click', `${path}game5_hard_button_select.png`);
         this.load.image('game5_mode_panel', `${path}game5_hardnormal_box.png`);
 
+        this.load.image('game5_object_description1', `${path}game5_object_description1.png`);
+        this.load.image('game5_object_description2', `${path}game5_object_description2.png`);
 
         //normal version
         const normalPath = 'assets/images/Game_5/normalversion/';
@@ -46,8 +48,11 @@ export class GameScene_5 extends BaseGameScene {
     }
 
     create() {
-        const centerX = this.cameras.main.width / 2;
-        const centerY = this.cameras.main.height / 2 + 100;
+        this.centerX = this.cameras.main.width / 2;
+        this.centerY = this.cameras.main.height / 2 + 100;
+
+        const centerX = this.centerX;
+        const centerY = this.centerY;
 
         this.isNormalMode = true;
         this.isSetMode = false;
@@ -324,20 +329,38 @@ export class GameScene_5 extends BaseGameScene {
         this.setupGameObjects();
     }
 
-    showWin() {
+    onRoundWin() {
+        if (!this.isGameActive || this.gameState === 'gameWin') return;
+
+        let isFinalWin = (this.roundIndex + 1 >= this.targetRounds) || this.isAllowRoundFail;
+        this.gameState = isFinalWin ? 'gameWin' : 'roundWin';
+
+        this.gameTimer.stop();
+        this._calculateTiming(isFinalWin);
+        this.enableGameInteraction(false);
+        this.updateRoundUI(true);
+        // Feedback Visuals
+        this.showFeedbackLabel(true);
+
+        console.log(`Game won!`);
+
         if (this.isNormalMode) {
-            this.winPreview = this.add.image(this.centerX, this.centerY + 100, 'game5_normal_success_preview').setDepth(1000)
-                .setInteractive({ useHandCursor: true }).setScale(1.3)
+            this.winPreview = this.add.image(this.centerX, this.centerY, 'game5_normal_success_preview').setDepth(1000)
+                .setInteractive({ useHandCursor: true }).setScale(1.1)
         } else {
-            this.winPreview = this.add.image(this.centerX, this.centerY + 100, 'game5_hard_success_preview').setDepth(1000)
-                .setInteractive({ useHandCursor: true }).setScale(1.3)
+            this.winPreview = this.add.image(this.centerX, this.centerY, 'game5_hard_success_preview').setDepth(1000)
+                .setInteractive({ useHandCursor: true }).setScale(1.1)
         }
-        this.winPreview.setInteractive({ useHandCursor: true }).setScale(1.3)
+        this.winPreview.setInteractive({ useHandCursor: true }).setScale(1.1)
             .on('pointerdown', () => {
                 this.winPreview.destroy();
-                this.showObjectPanel();
+                this.showBubble('win', this.playerGender);
             });
 
+    }
+
+    showWin() {
+        this.showObjectPanel();
     }
 
     showObjectPanel() {
@@ -347,7 +370,7 @@ export class GameScene_5 extends BaseGameScene {
         ]);
         objectPanel.setDepth(1000);
         objectPanel.show();
-        //objectPanel.setCloseCallBack(() => GameManager.backToMainStreet(this));
+        objectPanel.setCloseCallBack(() => GameManager.backToMainStreet(this));
     }
 
     showFailPanel() {
@@ -355,10 +378,10 @@ export class GameScene_5 extends BaseGameScene {
             popupPanel.destroy();
             this.isSetMode = false;
             this.restartGame();
-            // restartGame() sets descriptionPanel close → startGame(); override it to show mode panel instead
+
             this.gameUI.descriptionPanel?.setCloseCallBack(() => this.showChooseModePanel());
         }, () => {
-            //GameManager.backToMainStreet(this);
+            GameManager.backToMainStreet(this);
         });
         popupPanel.setDepth(1000);
     }
