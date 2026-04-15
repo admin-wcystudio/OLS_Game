@@ -304,6 +304,11 @@ export class GameScene_3 extends BaseGameScene {
     }
 
     resetForNewRound() {
+
+        if (this.gameState === 'init') {
+            this.currentIndex = 1;
+        }
+
         // Destroy question image
         if (this.questionImage) { this.questionImage.destroy(); this.questionImage = null; }
 
