@@ -51,7 +51,11 @@ export class GameScene_4 extends BaseGameScene {
         const centerX = this.cameras.main.width / 2;
         const centerY = this.cameras.main.height / 2;
 
-        this.add.image(centerX, centerY, 'game4_card_bg').setDepth(5);
+        const tray = this.add.image(centerX, centerY, 'game4_card_bg').setOrigin(0.5).setDepth(5);
+        const trayLeft = tray.x - tray.width / 2;
+
+        // Slot centers measured from game4_card_bg.png (image origin top-left)
+        const slotLocalXs = [151, 323, 494, 666, 838, 1010, 1182, 1354, 1526];
 
         // Set 9 fixed card spawn positions
         this.spawnCardPositions = [
@@ -66,17 +70,13 @@ export class GameScene_4 extends BaseGameScene {
             { x: centerX + 600, y: centerY + 250, }
         ];
 
-        this.defaultCards = [
-            { id: 1, content: 'game4_card1', targetX: centerX - 680, targetY: centerY, occupiedBy: null },
-            { id: 2, content: 'game4_card2', targetX: centerX - 520, targetY: centerY, occupiedBy: null },
-            { id: 3, content: 'game4_card3', targetX: centerX - 350, targetY: centerY, occupiedBy: null },
-            { id: 4, content: 'game4_card4', targetX: centerX - 180, targetY: centerY, occupiedBy: null },
-            { id: 5, content: 'game4_card5', targetX: centerX, targetY: centerY, occupiedBy: null },
-            { id: 6, content: 'game4_card6', targetX: centerX + 180, targetY: centerY, occupiedBy: null },
-            { id: 7, content: 'game4_card7', targetX: centerX + 360, targetY: centerY, occupiedBy: null },
-            { id: 8, content: 'game4_card8', targetX: centerX + 520, targetY: centerY, occupiedBy: null },
-            { id: 9, content: 'game4_card9', targetX: centerX + 700, targetY: centerY, occupiedBy: null }
-        ];
+        this.defaultCards = slotLocalXs.map((localX, i) => ({
+            id: i + 1,
+            content: `game4_card${i + 1}`,
+            targetX: trayLeft + localX,
+            targetY: centerY,
+            occupiedBy: null
+        }));
 
         this.cardGroup = this.add.group();
 
@@ -84,7 +84,7 @@ export class GameScene_4 extends BaseGameScene {
         const shuffledPositions = Phaser.Utils.Array.Shuffle([...this.spawnCardPositions]);
         this.defaultCards.forEach((cardInfo, i) => {
             const spawnPos = shuffledPositions[i % shuffledPositions.length];
-            const card = this.add.image(spawnPos.x, spawnPos.y, cardInfo.content);
+            const card = this.add.image(spawnPos.x, spawnPos.y, cardInfo.content).setOrigin(0.5);
             card.setData({ targetX: cardInfo.targetX, targetY: cardInfo.targetY, isCorrect: false });
             card.on('pointerdown', () => {
                 this.selectCard(card);
@@ -93,9 +93,14 @@ export class GameScene_4 extends BaseGameScene {
             card.setDepth(10);
         });
 
-        this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+        this.input.on('dragstart', (pointer, gameObject) => {
             if (this.selectedCard !== gameObject) this.selectCard(gameObject);
-            gameObject.setPosition(dragX, dragY).setDepth(100);
+            gameObject.setPosition(pointer.worldX, pointer.worldY).setDepth(100);
+        });
+
+        this.input.on('drag', (pointer, gameObject) => {
+            if (this.selectedCard !== gameObject) this.selectCard(gameObject);
+            gameObject.setPosition(pointer.worldX, pointer.worldY).setDepth(100);
         });
 
         this.input.on('dragend', (pointer, gameObject) => {
@@ -148,28 +153,30 @@ export class GameScene_4 extends BaseGameScene {
     }
 
     checkSnap(card) {
-        // Find the nearest unoccupied card position within threshold
         const threshold = 60;
         let nearest = null;
         let minDist = Infinity;
+
         this.defaultCards.forEach(pos => {
-            if (!pos.occupiedBy) {
-                const d = Phaser.Math.Distance.Between(card.x, card.y, pos.targetX, pos.targetY);
-                if (d < threshold && d < minDist) {
-                    minDist = d;
-                    nearest = pos;
-                    card.setPosition(pos.targetX, pos.targetY);
-                    pos.occupiedBy = card;
-                    card.clearTint();
-                }
-            } else {
-                if (pos.occupiedBy === card) {
-                    pos.occupiedBy = null;
-                    card.clearTint();
-                }
+            if (pos.occupiedBy === card) {
+                pos.occupiedBy = null;
             }
-            //console.log('Target Position -', pos.id, ',current card', pos.occupiedBy ? pos.occupiedBy.texture.key : 'none');
         });
+
+        this.defaultCards.forEach(pos => {
+            if (pos.occupiedBy) return;
+            const d = Phaser.Math.Distance.Between(card.x, card.y, pos.targetX, pos.targetY);
+            if (d < threshold && d < minDist) {
+                minDist = d;
+                nearest = pos;
+            }
+        });
+
+        if (nearest) {
+            card.setPosition(nearest.targetX, nearest.targetY);
+            nearest.occupiedBy = card;
+            card.clearTint();
+        }
     }
 
     randomCardPosition(cards) {
@@ -238,16 +245,24 @@ export class GameScene_4 extends BaseGameScene {
         objectPanel.setCloseCallBack(() => GameManager.backToMainStreet(this));
     }
 
+    nextRound() {
+        super.nextRound();
+        this.resetForNewRound();
+    }
+
     resetForNewRound() {
         this.randomCardPosition(this.cardGroup.getChildren());
         this.cardGroup.setVisible(true);
+        this.confirm_button.setVisible(true);
 
         this.cardGroup.getChildren().forEach(card => {
             card.setData('isCorrect', false);
+            card.clearTint();
         });
         this.defaultCards.forEach(pos => {
             pos.occupiedBy = null;
         });
+        this.selectedCard = null;
         this.isChecked = false;
         this.enableGameInteraction(true);
     }

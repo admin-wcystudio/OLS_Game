@@ -127,9 +127,12 @@ class BaseButton extends Phaser.GameObjects.Image {
             this.setTint(0x888888); // Greyscale look
             this.setAlpha(0.7);
         } else {
-            this.setInteractive();
+            this.isHeldDown = false;
+            this.isClicked = false;
+            this.setInteractive({ useHandCursor: true });
             this.clearTint();
             this.setAlpha(1);
+            this.setNormalState();
         }
     }
 

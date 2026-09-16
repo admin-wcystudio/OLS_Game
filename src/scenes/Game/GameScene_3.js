@@ -72,11 +72,12 @@ export class GameScene_3 extends BaseGameScene {
     }
 
     setupGameObjects() {
+        this.input.removeAllListeners('dragstart');
         this.input.removeAllListeners('drag');
         this.input.removeAllListeners('dragend');
 
         this.questionImage = this.add.image(this.centerX,
-            this.centerY + 50, `game3_q${this.currentIndex}`).setDepth(200);
+            this.centerY + 50, `game3_q${this.currentIndex}`).setOrigin(0.5).setDepth(200);
 
         this.confirmBtn = new CustomButton(this, this.centerX, this.centerY + 450,
             'game3_confirm_button', 'game3_confirm_button_select', () => {
@@ -102,29 +103,27 @@ export class GameScene_3 extends BaseGameScene {
             }
         ];
 
-        this.targetContents = [
-            {
-                q: 1,
-                fillPositions: [
-                    { x: 850, y: 580, targetKey: 'game3_q1_correct_answer1' },
-                    { x: 1125, y: 580, targetKey: 'game3_q1_correct_answer2' }
-                ]
-            },
-            {
-                q: 2,
-                fillPositions: [
-                    { x: 1050, y: 580, targetKey: 'game3_q2_correct_answer1' }
-                ]
-            },
-            {
-                q: 3,
-                fillPositions: [
-                    { x: 980, y: 580, targetKey: 'game3_q3_correct_answer1' }
-                ]
-            }
-        ];
+        // Slot centers measured from game3_q*.png (image origin top-left)
+        const localSlots = {
+            1: [
+                { localX: 702.5, localY: 382, targetKey: 'game3_q1_correct_answer1' },
+                { localX: 984, localY: 382, targetKey: 'game3_q1_correct_answer2' }
+            ],
+            2: [
+                { localX: 908.5, localY: 382, targetKey: 'game3_q2_correct_answer1' }
+            ],
+            3: [
+                { localX: 834.5, localY: 382, targetKey: 'game3_q3_correct_answer1' }
+            ]
+        };
 
-        const currentFillPositions = this.targetContents[this.currentIndex - 1].fillPositions;
+        const qLeft = this.questionImage.x - this.questionImage.width / 2;
+        const qTop = this.questionImage.y - this.questionImage.height / 2;
+        const currentFillPositions = localSlots[this.currentIndex].map((slot) => ({
+            x: qLeft + slot.localX,
+            y: qTop + slot.localY,
+            targetKey: slot.targetKey
+        }));
 
         // // Debug graphics for fill positions
         // if (!this.fillDebugGraphics) {
@@ -157,7 +156,7 @@ export class GameScene_3 extends BaseGameScene {
             targetKey: slot.targetKey,
             occupiedBy: null,
             hintImage: this.add.image(slot.x, slot.y, 'game3_select_area')
-                .setDepth(199).setAlpha(0),
+                .setOrigin(0.5).setDepth(199).setAlpha(0),
             snapImage: null
         }));
 
@@ -168,25 +167,35 @@ export class GameScene_3 extends BaseGameScene {
             const pos = shuffledPositions[index];
             const fillKey = answerToFillMap[answerKey];
             const img = this.add.image(pos.x, pos.y, answerKey)
+                .setOrigin(0.5)
                 .setDepth(200)
                 .setInteractive({ draggable: true, useHandCursor: true });
             img.setData({ answerKey, fillKey, originX: pos.x, originY: pos.y });
             this.answerImages.push(img);
         });
 
-        // Drag: move image and show hint on nearby empty slots
-        this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
-            gameObject.setPosition(dragX, dragY).setDepth(300);
+        const moveDragged = (pointer, gameObject) => {
+            const x = pointer.worldX;
+            const y = pointer.worldY;
+            gameObject.setPosition(x, y).setDepth(300);
             const fillKey = gameObject.getData('fillKey');
             this.fillSlots.forEach(slot => {
                 if (slot.occupiedBy) return;
-                const dist = Phaser.Math.Distance.Between(dragX, dragY, slot.x, slot.y);
+                const dist = Phaser.Math.Distance.Between(x, y, slot.x, slot.y);
                 if (dist < snapTolerance) {
                     slot.hintImage.setTexture(fillKey).setAlpha(0.6);
                 } else {
                     slot.hintImage.setAlpha(0);
                 }
             });
+        };
+
+        this.input.on('dragstart', (pointer, gameObject) => {
+            moveDragged(pointer, gameObject);
+        });
+
+        this.input.on('drag', (pointer, gameObject) => {
+            moveDragged(pointer, gameObject);
         });
 
         // Drag end: snap to nearest slot or return to origin
@@ -210,6 +219,7 @@ export class GameScene_3 extends BaseGameScene {
             if (nearest) {
                 nearest.occupiedBy = answerKey;
                 nearest.snapImage = this.add.image(nearest.x, nearest.y, fillKey)
+                    .setOrigin(0.5)
                     .setDepth(200)
                     .setInteractive({ useHandCursor: true });
 
