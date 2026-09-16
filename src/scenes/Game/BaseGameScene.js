@@ -2,6 +2,7 @@ import { CustomButton } from '../../UI/Button.js';
 import UIHelper from '../../UI/UIHelper.js';
 import GameManager from '../GameManager.js';
 import { CustomPanel, CustomFailPanel } from '../../UI/Panel.js';
+import VoiceOverHelper from '../../Audio/VoiceOverHelper.js';
 
 /**
  * Enhanced BaseGameScene
@@ -70,6 +71,7 @@ export default class BaseGameScene extends Phaser.Scene {
             isContinuousTimer: this.isContinuousTimer
         });
 
+        VoiceOverHelper.ensureBgm(this);
         this.gameState = 'init';
         this.roundIndex = 0;
         this.totalUsedSeconds = 0;
@@ -110,9 +112,14 @@ export default class BaseGameScene extends Phaser.Scene {
      * @param {object} options - { autoCloseMs: number, onClose: function }
      */
     showBubble(type, gender = null, options = {}) {
+        VoiceOverHelper.stop(this);
         if (this.currentBubbleImg) {
             this.currentBubbleImg.destroy();
             this.currentBubbleImg = null;
+        }
+        if (type === 'noBubble') {
+            this.onWinBubbleClose();
+            return;
         }
         const centerX = this.cameras.main.width / 2;
         // Adaptive Y: 20% from bottom for win/tryagain, 80% for intro
@@ -159,10 +166,12 @@ export default class BaseGameScene extends Phaser.Scene {
             duration: 200,
             ease: 'Back.easeOut'
         });
+        VoiceOverHelper.playBubbleVo(this, targetKey);
         let closed = false;
         const closeBubble = () => {
             if (closed) return;
             closed = true;
+            VoiceOverHelper.stop(this);
             if (this.currentBubbleImg) {
                 this.currentBubbleImg.destroy();
                 this.currentBubbleImg = null;
@@ -226,8 +235,6 @@ export default class BaseGameScene extends Phaser.Scene {
                     GameManager.backToMainStreet(this);
                 });
             }
-        } else if (type === 'noBubble') {
-            this.onWinBubbleClose();
         }
     }
 
@@ -434,6 +441,7 @@ export default class BaseGameScene extends Phaser.Scene {
         this._setupTimer();
 
         // 3. Clear bubbles and feedback labels
+        VoiceOverHelper.stop(this);
         if (this.currentBubbleImg) {
             this.currentBubbleImg.destroy();
             this.currentBubbleImg = null;
@@ -527,6 +535,7 @@ export default class BaseGameScene extends Phaser.Scene {
      * Cleans up the scene to prevent memory leaks
      */
     shutdown() {
+        VoiceOverHelper.stop(this);
         if (this.gameTimer) this.gameTimer.stop();
         this.tweens.killAll();
         this.events.off('game-start');

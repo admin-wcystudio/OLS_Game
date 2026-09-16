@@ -1,3 +1,5 @@
+import VoiceOverHelper from '../Audio/VoiceOverHelper.js';
+
 export class BootScene extends Phaser.Scene {
     constructor() {
         super('BootScene');
@@ -7,6 +9,7 @@ export class BootScene extends Phaser.Scene {
         this.load.plugin('rexinputtextplugin', 'https://cdn.jsdelivr.net/npm/phaser3-rex-plugins@1.80.17/dist/rexinputtextplugin.min.js', true);
 
         this.load.audio('bgm', 'assets/music/bgm.mp3');
+        VoiceOverHelper.preload(this);
         // Load assets for the boot scene
         const gameStartPath = 'assets/images/GameStart/';
 

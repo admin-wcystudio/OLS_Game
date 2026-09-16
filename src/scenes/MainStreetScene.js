@@ -3,6 +3,7 @@ import UIHelper from '../UI/UIHelper.js';
 import { CustomPanel, SettingPanel } from '../UI/Panel.js';
 import NpcHelper from '../Character/NpcHelper.js';
 import GameManager from './GameManager.js';
+import VoiceOverHelper from '../Audio/VoiceOverHelper.js';
 
 export class MainStreetScene extends Phaser.Scene {
     constructor() {
@@ -127,6 +128,9 @@ export class MainStreetScene extends Phaser.Scene {
     }
 
     create() {
+        this.events.once('shutdown', () => VoiceOverHelper.stop(this));
+        VoiceOverHelper.ensureBgm(this);
+
         // Create NPC animations
         this.createAnimations();
 
@@ -280,9 +284,8 @@ export class MainStreetScene extends Phaser.Scene {
                     if (npc.glowKey) {
                         npc.setTexture(npc.glowKey);
                     }
-                    const gameNumber = npc.id;
-                    const sceneKey = `GameScene_${gameNumber}`;
-                    this.loadBubble(0, npc.bubbles, sceneKey, npc);
+                    const { bubbles, sceneKey } = this.getNpcDialogue(npc);
+                    this.loadBubble(0, bubbles, sceneKey, npc);
                 }
             });
         });
@@ -354,6 +357,7 @@ export class MainStreetScene extends Phaser.Scene {
                     this.bubbleTimers = [];
 
                     // 2. Destroy NPC Bubble
+                    VoiceOverHelper.stop(this);
                     if (this.currentActiveBubble) {
                         this.currentActiveBubble.destroy();
                         this.currentActiveBubble = null;
@@ -390,7 +394,36 @@ export class MainStreetScene extends Phaser.Scene {
     }
 
 
+    arePreviousGamesComplete(upToGame = 6) {
+        const results = GameManager.loadGameResult();
+        return Array.from({ length: upToGame }, (_, i) => i + 1).every((n) => {
+            const res = results.find((r) => r.game === n);
+            return res && res.isFinished;
+        });
+    }
+
+    getNpcDialogue(npc) {
+        const gameNumber = npc.id;
+        if (gameNumber === 7) {
+            if (this.arePreviousGamesComplete(6)) {
+                return {
+                    bubbles: ['game7_npc_box_mainstreet'],
+                    sceneKey: 'GameScene_7'
+                };
+            }
+            return {
+                bubbles: ['game7_npc_box_mainstreet_no1', 'game7_npc_box_mainstreet_no2'],
+                sceneKey: null
+            };
+        }
+        return {
+            bubbles: npc.bubbles,
+            sceneKey: `GameScene_${gameNumber}`
+        };
+    }
+
     loadBubble(index = 0, bubbles, sceneKey, targetNpc) {
+        VoiceOverHelper.stop(this);
         if (this.currentActiveBubble) {
             this.currentActiveBubble.destroy();
         }
@@ -407,19 +440,28 @@ export class MainStreetScene extends Phaser.Scene {
 
         // Disable all NPC item interactivity while bubble is showing
         this.interactiveNpcs.forEach(n => n.disableInteractive());
+        VoiceOverHelper.playBubbleVo(this, bubbles[index]);
 
-        // Click intro bubble to start game directly
         this.bubbleImg.on('pointerdown', () => {
+            index++;
+            if (index < bubbles.length) {
+                this.bubbleImg.setTexture(bubbles[index]);
+                VoiceOverHelper.playBubbleVo(this, bubbles[index]);
+                return;
+            }
+
+            VoiceOverHelper.stop(this);
             this.bubbleImg.destroy();
             this.currentActiveBubble = null;
+            this.interactiveNpcs.forEach(n => n.setInteractive({ useHandCursor: true }));
 
-            const timer = this.time.delayedCall(500, () => {
-                if (sceneKey) {
+            if (sceneKey) {
+                const timer = this.time.delayedCall(500, () => {
                     localStorage.setItem('playerPosition', JSON.stringify({ x: this.playerSprite.x, y: this.playerSprite.y }));
                     GameManager.switchToGameScene(this, sceneKey);
-                }
-            });
-            this.bubbleTimers.push(timer);
+                });
+                this.bubbleTimers.push(timer);
+            }
         });
 
         // 彈出動畫
