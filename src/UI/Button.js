@@ -15,6 +15,7 @@ class BaseButton extends Phaser.GameObjects.Image {
         this.isClicked = false;     // Used for toggle mode
         this.needClicked = false;   // If true, behaves like a checkbox/toggle
         this.isHeldDown = false;    // Track if button is actively being pressed
+        this.locked = false;
         this.sfx = null;            // Placeholder for click sounds
 
         // Add to scene and enable input
@@ -38,7 +39,7 @@ class BaseButton extends Phaser.GameObjects.Image {
     }
 
     handleDown() {
-        if (!this.input?.enabled) return;
+        if (this.locked || !this.input?.enabled) return;
 
         this.playButtonClick();
         this.isHeldDown = true;
@@ -59,7 +60,7 @@ class BaseButton extends Phaser.GameObjects.Image {
     }
 
     handleUp() {
-        if (!this.input?.enabled) return;
+        if (this.locked || !this.input?.enabled) return;
         this.isHeldDown = false;
         if (!this.needClicked) {
             this.setNormalState();
@@ -68,7 +69,7 @@ class BaseButton extends Phaser.GameObjects.Image {
     }
 
     handleOver() {
-        if (!this.input?.enabled || this.isClicked) return;
+        if (this.locked || !this.input?.enabled || this.isClicked) return;
 
         this.setPressedState();
 
@@ -81,7 +82,7 @@ class BaseButton extends Phaser.GameObjects.Image {
     }
 
     handleOut() {
-        if (!this.input?.enabled) return;
+        if (this.locked || !this.input?.enabled) return;
         if (!this.isClicked) {
             this.setNormalState();
 
@@ -112,6 +113,12 @@ class BaseButton extends Phaser.GameObjects.Image {
             scale: 1,
             duration: 100
         });
+    }
+
+    setLocked(isLocked) {
+        this.locked = isLocked;
+        if (isLocked) this.disableInteractive();
+        else this.setInteractive({ useHandCursor: true });
     }
 
     setActive(canEnable) {
@@ -158,5 +165,13 @@ export class CustomButton2 extends BaseButton {
     handleOut() {
         // Override: Keep it simple
         if (!this.isClicked) this.setNormalState();
+    }
+    setPressedState() {
+        if (this.pressedKey) this.setTexture(this.pressedKey);
+        this.setScale(0.95);
+    }
+    setNormalState() {
+        if (this.normalKey) this.setTexture(this.normalKey);
+        this.setScale(1);
     }
 }
