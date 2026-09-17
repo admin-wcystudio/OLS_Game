@@ -336,13 +336,14 @@ export class LoginScene extends Phaser.Scene {
                 repeat
             });
         };
+        
+        createSheetAnim('boy_galaxy_anim', 'boy_galaxy', 15, 12, -1);
+        createSheetAnim('boy_chinese_anim', 'boy_chinese', 15, 12, -1);
+        createSheetAnim('boy_transition_anim', 'boy_transition', 19, 12, 0);
+        createSheetAnim('girl_galaxy_anim', 'girl_galaxy', 15, 12, -1);
+        createSheetAnim('girl_chinese_anim', 'girl_chinese', 15, 12, -1);
+        createSheetAnim('girl_transition_anim', 'girl_transition', 24, 12, 0);
 
-        createSheetAnim('boy_galaxy_anim', 'boy_galaxy', 15, 16, -1);
-        createSheetAnim('boy_chinese_anim', 'boy_chinese', 15, 16, -1);
-        createSheetAnim('boy_transition_anim', 'boy_transition', 19, 16, 0);
-        createSheetAnim('girl_galaxy_anim', 'girl_galaxy', 15, 16, -1);
-        createSheetAnim('girl_chinese_anim', 'girl_chinese', 15, 16, -1);
-        createSheetAnim('girl_transition_anim', 'girl_transition', 24, 16, 0);
 
         // NPC Animations are now created in MainStreetScene
     }
