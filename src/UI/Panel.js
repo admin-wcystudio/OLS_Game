@@ -1,4 +1,5 @@
 import { CustomButton, CustomButton2 } from './Button.js';
+import VoiceOverHelper from '../Audio/VoiceOverHelper.js';
 /**
  * BASE PANEL CLASS
  * Provides common functionality for all game overlays
@@ -119,111 +120,157 @@ export class SettingPanel extends Phaser.GameObjects.Container {
     constructor(scene, x, y) {
         super(scene, x, y);
         this.scene = scene;
+        this.currentPage = 0;
         this.toggleBtn = null;
 
-        // 1. Load Data
         const savedData = localStorage.getItem('gameSettings');
         const settings = savedData ? JSON.parse(savedData) : { volume: 3, language: 'HK' };
 
         this.currentVolume = settings.volume;
-        this.currentLanguage = settings.language;
+        this.currentLanguage = settings.language === 'CN' ? 'CN' : 'HK';
         this.volumeCells = [];
 
-        // 2. Build UI
-        this.setupUI();
+        // background
+        this.contentImage = scene.add.image(0, 0, 'setting_bg').setScrollFactor(0);
+        this.add(this.contentImage);
 
-        // 3. Initial Sync
-        this.updateVolumeDisplay();
-        this.refreshLanguageUI();
-
-        scene.add.existing(this);
-        this.setVisible(false);
-    }
-
-    setupUI() {
-        // Background
-        this.bg = this.scene.add.image(0, 0, 'setting_bg').setScrollFactor(0);
-        this.add(this.bg);
-
-        // Volume Section
-        this.volumeBg = this.scene.add.image(130, -100, 'vol_bg').setScrollFactor(0);
+        //sound
+        this.volumeBg = scene.add.image(130, -100, 'vol_bg').setScrollFactor(0);
         this.add(this.volumeBg);
 
         const startX = -260;
-        const cellGap = 130;
+        let cellGap = 130;
+
         for (let i = 1; i <= 5; i++) {
-            let cell = this.scene.add.image(startX + (i * cellGap), -103, `vol_${i}`).setScrollFactor(0);
+            let cell = scene.add.image(startX + (cellGap * i), -103, `vol_${i}`).setScrollFactor(0);
+            cell.setDepth(104);
             this.add(cell);
             this.volumeCells.push(cell);
+            cell.setVisible(i <= this.currentVolume);
         }
 
-        // Language Section
-        this.mandarinBtn = new CustomButton2(this.scene, -50, 50, 'lang_mandarin', 'lang_mandarin_click', () => this.setLanguage('CN'));
-        this.cantoneseBtn = new CustomButton2(this.scene, 300, 50, 'lang_cantonese', 'lang_cantonese_click', () => this.setLanguage('HK'));
-
+        // Language Section — radio: exactly one of Putonghua / Cantonese is always selected
+        this.mandarinBtn = new CustomButton2(
+            scene, -50, 50, 'lang_mandarin', 'lang_mandarin_click',
+            () => this.setLanguage('CN'),
+            () => this.setLanguage('CN')
+        ).setScrollFactor(0);
+        this.mandarinBtn.setDepth(105);
         this.mandarinBtn.needClicked = true;
+
+        this.cantoneseBtn = new CustomButton2(
+            scene, 300, 50, 'lang_cantonese', 'lang_cantonese_click',
+            () => this.setLanguage('HK'),
+            () => this.setLanguage('HK')
+        ).setScrollFactor(0);
+        this.cantoneseBtn.setDepth(105);
         this.cantoneseBtn.needClicked = true;
         this.add([this.mandarinBtn, this.cantoneseBtn]);
 
-        // Controls
-        this.prevBtn = new CustomButton(this.scene, -250, -100, 'vol_left', 'vol_left_click', () => this.setVolume(-1));
-        this.nextBtn = new CustomButton(this.scene, 525, -100, 'vol_right', 'vol_right_click', () => this.setVolume(1));
+        this.prevBtn = new CustomButton(scene, -250, -100, 'vol_left', 'vol_left_click', () => this.setVolume(-1)).setScrollFactor(0);
+        this.nextBtn = new CustomButton(scene, 525, -100, 'vol_right', 'vol_right_click', () => this.setVolume(1)).setScrollFactor(0);
+        this.closeBtn = new CustomButton(scene, 625, -295, 'close_button', 'close_button_click', () => {
+            this.setVisible(false);
 
-        this.closeBtn = new CustomButton(this.scene, 625, -295, 'close_button', 'close_button_click', () => this.hide());
-        this.saveBtn = new CustomButton(this.scene, -50, 200, 'save_btn', 'save_btn_click', () => this.saveToLocal());
+            if (this.toggleBtn) {
+                this.toggleBtn.resetStatus();
+            }
+        }).setScrollFactor(0);
 
-        this.add([this.prevBtn, this.nextBtn, this.closeBtn, this.saveBtn]);
+        this.saveBtn = new CustomButton(scene, -50, 200, 'save_btn', 'save_btn_click',
+            () => this.saveToLocal()).setScrollFactor(0);
+        this.saveBtn.setDepth(104);
+        this.add(this.saveBtn);
+        this.saveBtn.needClicked = false;
 
-        // Ensure all UI elements ignore camera scroll
-        this.list.forEach(item => item.setScrollFactor(0));
+        this.prevBtn.needClicked = false;
+        this.nextBtn.needClicked = false;
+        this.closeBtn.needClicked = false;
+
+        this.add([this.prevBtn, this.nextBtn, this.closeBtn]);
+        scene.add.existing(this);
+
+        this.setLanguage(this.currentLanguage);
+        this.refresh();
+        this.setVisible(false);
     }
 
     setVolume(dir) {
-        // Use Clamp to keep volume between 1 and 5
-        this.currentVolume = Phaser.Math.Clamp(this.currentVolume + dir, 1, 5);
-        this.updateVolumeDisplay();
+        this.currentVolume += dir;
 
-        // Immediate feedback: Update global sound volume
-        this.scene.sound.volume = this.currentVolume * 0.2;
-    }
+        if (this.currentVolume < 1) this.currentVolume = 1;
+        if (this.currentVolume > 5) this.currentVolume = 5;
 
-    updateVolumeDisplay() {
         this.volumeCells.forEach((cell, index) => {
+            // index 是 0-4，currentVolume 是 1-5
             cell.setVisible(index < this.currentVolume);
         });
+
+        this.scene.sound.volume = this.currentVolume * 0.2;
+        console.log("Current Volume Level:", this.currentVolume);
     }
 
     setLanguage(lang) {
-        if (this.currentLanguage === lang) return; // Skip if no change
-        this.currentLanguage = lang;
-        this.refreshLanguageUI();
+        const next = (lang === 'CN') ? 'CN' : 'HK';
+        const changed = this.currentLanguage !== next;
+        this.currentLanguage = next;
+        console.log("Setting language to:", lang);
+
+        if (this.currentLanguage === 'CN') {
+            console.log("Switch to Mandarin");
+            this.mandarinBtn.isClicked = true;
+            this.mandarinBtn.setPressedState();
+
+            this.cantoneseBtn.isClicked = false;
+            this.cantoneseBtn.setNormalState();
+        } else {
+            console.log("Switch to Cantonese");
+            this.cantoneseBtn.isClicked = true;
+            this.cantoneseBtn.setPressedState();
+
+            this.mandarinBtn.isClicked = false;
+            this.mandarinBtn.setNormalState();
+        }
+
+        if (!changed) return;
+        this.persistSettings();
+        VoiceOverHelper.replayCurrent(this.scene);
     }
 
-    refreshLanguageUI() {
-        const isMandarin = this.currentLanguage === 'CN';
-
-        // Sync Mandarin Button State
-        this.mandarinBtn.isClicked = isMandarin;
-        isMandarin ? this.mandarinBtn.setPressedState() : this.mandarinBtn.setNormalState();
-
-        // Sync Cantonese Button State
-        this.cantoneseBtn.isClicked = !isMandarin;
-        !isMandarin ? this.cantoneseBtn.setPressedState() : this.cantoneseBtn.setNormalState();
+    persistSettings() {
+        localStorage.setItem('gameSettings', JSON.stringify({
+            volume: this.currentVolume,
+            language: this.currentLanguage === 'CN' ? 'CN' : 'HK'
+        }));
     }
 
     saveToLocal() {
         const settings = {
             volume: this.currentVolume,
-            language: this.currentLanguage
+            language: this.currentLanguage === 'CN' ? 'CN' : 'HK'
         };
+
         localStorage.setItem('gameSettings', JSON.stringify(settings));
-        this.hide();
+
+        console.log('Settings Saved:', settings);
+        VoiceOverHelper.replayCurrent(this.scene);
+
+        this.setVisible(false);
+        if (this.toggleBtn) this.toggleBtn.resetStatus();
+    }
+
+    refresh() {
+        if (this.volumeDisplay) {
+            this.volumeDisplay.setTexture(`vol_${this.currentVolume}`);
+        }
     }
 
     show() {
         this.setVisible(true);
-        this.refreshLanguageUI();
-        this.updateVolumeDisplay();
+        this.setLanguage(this.currentLanguage);
+        this.volumeCells.forEach((cell, index) => {
+            cell.setVisible(index < this.currentVolume);
+        });
     }
 
     hide() {

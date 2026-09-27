@@ -264,26 +264,17 @@ export class MainStreetScene extends Phaser.Scene {
 
         // Setup hover and click events for NPC items
         this.interactiveNpcs.forEach((npc) => {
-            // Mouse over - change to select texture when player is close
             npc.on('pointerover', () => {
-                if (npc.canInteract && npc.glowKey) {
-                    npc.setTexture(npc.glowKey);
-                }
+                if (npc.canInteract) this.setNpcHighlight(npc, true);
             });
 
-            // Mouse out - revert to base texture
             npc.on('pointerout', () => {
-                if (npc.baseKey) {
-                    npc.setTexture(npc.baseKey);
-                }
+                if (!npc.canInteract) this.setNpcHighlight(npc, false);
             });
 
-            // Click - change to select texture and load bubble
             npc.on('pointerdown', () => {
                 if (npc.canInteract) {
-                    if (npc.glowKey) {
-                        npc.setTexture(npc.glowKey);
-                    }
+                    this.setNpcHighlight(npc, true);
                     const { bubbles, sceneKey } = this.getNpcDialogue(npc);
                     this.loadBubble(0, bubbles, sceneKey, npc);
                 }
@@ -326,29 +317,17 @@ export class MainStreetScene extends Phaser.Scene {
         const allNpcs = [...this.interactiveNpcs];
 
         allNpcs.forEach(npc => {
-            // Check for pond items with custom interaction range
+            let inRange = false;
             if (npc.pondInteractRange) {
                 const playerX = this.playerSprite.x;
-                if (playerX >= npc.pondInteractRange.minX && playerX <= npc.pondInteractRange.maxX) {
-                    npc.canInteract = true;
-                } else {
-                    npc.canInteract = false;
-                }
-                return;
+                inRange = playerX >= npc.pondInteractRange.minX && playerX <= npc.pondInteractRange.maxX;
+            } else {
+                inRange = Math.abs(this.playerSprite.x - npc.x) < npc.proximityDistance;
             }
 
-            const dist = Math.abs(this.playerSprite.x - npc.x);
+            this.setNpcHighlight(npc, inRange);
 
-            if (dist < npc.proximityDistance) {
-                npc.canInteract = true;
-                //  npc.setTint(0x888888);
-            } else {
-                npc.canInteract = false;
-                // Revert texture when player leaves proximity
-                if (npc.baseKey) {
-                    npc.setTexture(npc.baseKey);
-                }
-                //  npc.setTint(0xffffff);
+            if (!inRange) {
                 // IF THIS NPC was the one owning the active bubble
                 if (this.currentActiveBubble && this.currentActiveBubble.ownerNpc === npc) {
 
@@ -367,6 +346,14 @@ export class MainStreetScene extends Phaser.Scene {
                 }
             }
         });
+    }
+
+    setNpcHighlight(npc, inRange) {
+        npc.canInteract = inRange;
+        const key = inRange && npc.glowKey ? npc.glowKey : npc.baseKey;
+        if (key && npc.texture && npc.texture.key !== key && this.textures.exists(key)) {
+            npc.setTexture(key);
+        }
     }
 
     handleAnimation(gender, isMoving, isLeft) {

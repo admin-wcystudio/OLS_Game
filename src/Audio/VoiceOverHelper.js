@@ -3,6 +3,8 @@ export default class VoiceOverHelper {
     static BGM_VOLUME = 0.5;
     static BGM_DUCKED_VOLUME = 0.12;
     static bgmAllowed = false;
+    static lastBubbleKey = null;
+    static lastIsPlayer = null;
 
     // Texture key -> VO file base (matches assets/VO and the VO script)
     static BUBBLE_VO = {
@@ -220,7 +222,18 @@ export default class VoiceOverHelper {
         if (restoreBgm) VoiceOverHelper.restoreBgm(scene);
     }
 
+    static replayCurrent(scene) {
+        if (!scene || !VoiceOverHelper.lastBubbleKey) return;
+        VoiceOverHelper.playBubbleVo(
+            scene,
+            VoiceOverHelper.lastBubbleKey,
+            VoiceOverHelper.lastIsPlayer
+        );
+    }
+
     static playBubbleVo(scene, bubbleKey, isPlayer = null) {
+        VoiceOverHelper.lastBubbleKey = bubbleKey;
+        VoiceOverHelper.lastIsPlayer = isPlayer;
         VoiceOverHelper.stop(scene, { restoreBgm: false });
         const boxBase = VoiceOverHelper.boxBaseFromBubbleKey(bubbleKey);
         if (!boxBase) {
