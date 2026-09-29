@@ -4,6 +4,7 @@ import { CustomPanel, SettingPanel } from '../UI/Panel.js';
 import NpcHelper from '../Character/NpcHelper.js';
 import GameManager from './GameManager.js';
 import VoiceOverHelper from '../Audio/VoiceOverHelper.js';
+import { gameConfig } from '../config.js';
 
 export class MainStreetScene extends Phaser.Scene {
     constructor() {
@@ -382,6 +383,7 @@ export class MainStreetScene extends Phaser.Scene {
 
 
     arePreviousGamesComplete(upToGame = 6) {
+        if (gameConfig.isTesting) return true;
         const results = GameManager.loadGameResult();
         return Array.from({ length: upToGame }, (_, i) => i + 1).every((n) => {
             const res = results.find((r) => r.game === n);

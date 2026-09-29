@@ -152,7 +152,7 @@ export class BootScene extends Phaser.Scene {
         const savedData = localStorage.getItem('gameSettings');
 
         if (savedData) {
-            const settings = JSON.parse(ssavedData);
+            const settings = JSON.parse(savedData);
 
             this.sound.volume = settings.volume * 0.2;
 
