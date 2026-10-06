@@ -25,6 +25,7 @@ export class GameScene_3 extends BaseGameScene {
         this.load.image('game3_npc_box_win', `${path}game3_npc_box2.png`);
         this.load.image('game3_npc_box_tryagain', `${path}game3_npc_box3.png`);
         this.load.image('game3_select_area', `${path}game3_select_area.png`);
+        this.load.image('game3_object_description', `${path}game3_object_description.png`);
 
         for (let i = 1; i <= 3; i++) {
             this.load.image(`game3_q${i}`, `${path}game3_q${i}.png`);
@@ -350,6 +351,26 @@ export class GameScene_3 extends BaseGameScene {
     }
 
     onWinBubbleClose() {
+        if (this.gameState === 'gameWin') {
+            if (this.sceneIndex > 0) {
+                GameManager.saveGameResult(this.sceneIndex, true, this.totalUsedSeconds);
+            }
+            this.showWin();
+            this.isGameActive = false;
+            this.gameState = 'completed';
+            return;
+        }
         GameManager.backToMainStreet(this);
+    }
+
+    showWin() {
+        const objectPanel = new CustomPanel(this, 960, 600, [{
+            content: 'game3_object_description',
+            closeBtn: 'close_btn',
+            closeBtnClick: 'close_btn_click'
+        }]);
+        objectPanel.setDepth(1000);
+        objectPanel.show();
+        objectPanel.setCloseCallBack(() => GameManager.backToMainStreet(this));
     }
 }

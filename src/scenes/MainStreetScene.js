@@ -254,6 +254,7 @@ export class MainStreetScene extends Phaser.Scene {
 
         // Add all NPC items to interactive NPCs array
         this.interactiveNpcs.push(n1_item, n2_item, n3_item, n4_item, n5_item, n6_item, n7_item);
+        this.refreshPondStages();
 
         this.currentInteractiveNpc = null;
 
@@ -321,7 +322,9 @@ export class MainStreetScene extends Phaser.Scene {
             let inRange = false;
             if (npc.pondInteractRange) {
                 const playerX = this.playerSprite.x;
-                inRange = playerX >= npc.pondInteractRange.minX && playerX <= npc.pondInteractRange.maxX;
+                inRange = npc.visible
+                    && playerX >= npc.pondInteractRange.minX
+                    && playerX <= npc.pondInteractRange.maxX;
             } else {
                 inRange = Math.abs(this.playerSprite.x - npc.x) < npc.proximityDistance;
             }
@@ -342,7 +345,10 @@ export class MainStreetScene extends Phaser.Scene {
                         this.currentActiveBubble.destroy();
                         this.currentActiveBubble = null;
                         // Re-enable all NPC item interactivity
-                        this.interactiveNpcs.forEach(n => n.setInteractive({ useHandCursor: true }));
+                        this.refreshPondStages();
+                        this.interactiveNpcs.forEach(n => {
+                            if (n.visible) n.setInteractive({ useHandCursor: true });
+                        });
                     }
                 }
             }
@@ -381,6 +387,23 @@ export class MainStreetScene extends Phaser.Scene {
         this.playerSprite.setFlipX(false); // talking animations seem to have dedicated left/right sprites
     }
 
+
+    refreshPondStages() {
+        const game3Done = !!GameManager.loadOneGameResult(3)?.isFinished;
+        const n3 = this.interactiveNpcs.find((n) => n.id === 3);
+        const n6 = this.interactiveNpcs.find((n) => n.id === 6);
+        if (!n3 || !n6) return;
+
+        n3.setVisible(!game3Done);
+        n6.setVisible(game3Done);
+        if (game3Done) {
+            n3.disableInteractive();
+            n6.setInteractive({ useHandCursor: true });
+        } else {
+            n6.disableInteractive();
+            n3.setInteractive({ useHandCursor: true });
+        }
+    }
 
     arePreviousGamesComplete(upToGame = 6) {
         if (gameConfig.isTesting) return true;
@@ -442,7 +465,10 @@ export class MainStreetScene extends Phaser.Scene {
             VoiceOverHelper.stop(this);
             this.bubbleImg.destroy();
             this.currentActiveBubble = null;
-            this.interactiveNpcs.forEach(n => n.setInteractive({ useHandCursor: true }));
+            this.refreshPondStages();
+            this.interactiveNpcs.forEach(n => {
+                if (n.visible) n.setInteractive({ useHandCursor: true });
+            });
 
             if (sceneKey) {
                 const timer = this.time.delayedCall(500, () => {
