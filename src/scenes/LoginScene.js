@@ -2,6 +2,7 @@ import { CustomButton } from '../UI/Button.js';
 import { CustomPanel, SettingPanel } from '../UI/Panel.js';
 import UIHelper from '../UI/UIHelper.js';
 import VoiceOverHelper from '../Audio/VoiceOverHelper.js';
+import GameManager from './GameManager.js';
 
 export class LoginScene extends Phaser.Scene {
     constructor() {
@@ -284,6 +285,7 @@ export class LoginScene extends Phaser.Scene {
             { game: 7, isFinished: false, seconds: 0 },
         ];
         localStorage.setItem('allGamesResult', JSON.stringify(allGamesResult));
+        GameManager.clearSessionClock();
 
         this.switchToTransitionScene();
     }

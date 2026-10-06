@@ -1,3 +1,3 @@
 export const gameConfig = {
-    isTesting: false
+    isTesting: true
 };

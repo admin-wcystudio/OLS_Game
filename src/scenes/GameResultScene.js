@@ -121,11 +121,12 @@ export class GameResultScene extends Phaser.Scene {
     getResultContent() {
         let playerName = this.playerInfo ? this.playerInfo.name : "玩家 1";
         let gender = this.playerInfo ? this.playerInfo.gender : "M";
-        let usedSeconds = 0;
-
-        for (const gameId in this.gameResults) {
-            const result = this.gameResults[gameId];
-            usedSeconds += result.seconds;
+        let usedSeconds = GameManager.getSessionSeconds();
+        if (usedSeconds == null) {
+            usedSeconds = 0;
+            for (const gameId in this.gameResults) {
+                usedSeconds += this.gameResults[gameId].seconds || 0;
+            }
         }
         console.log("Total Used Seconds:", usedSeconds);
 
