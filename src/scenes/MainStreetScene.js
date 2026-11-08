@@ -232,7 +232,7 @@ export class MainStreetScene extends Phaser.Scene {
         const n3_item = NpcHelper.createNpcItem(this, 3, width / 2 + 380, 1100, 1, 'stage_object_game3', 'stage_object_game3_select', 8);
         const n4_item = NpcHelper.createNpcItem(this, 4, width / 2 + 100, 380, 1, 'stage_object_game4', 'stage_object_game4_select', 8);
         const n5_item = NpcHelper.createNpcItem(this, 5, 180, 280, 1, 'stage_object_game5', 'stage_object_game5_select', 7);
-        const n6_item = NpcHelper.createNpcItem(this, 6, width / 2 + 380, 1100, 1, 'stage_object_game6', 'stage_object_game6_select', 7);
+        const n6_item = NpcHelper.createNpcItem(this, 6, width / 2 + 380, 1100, 1, 'stage_object_game6', 'stage_object_game6_select', 8);
         const n7_item = NpcHelper.createNpcItem(this, 7, width / 2 + 950, 650, 1, 'stage_object_game7', 'stage_object_game7_select', 10);
 
         n1_item.setScale(0.8);
@@ -390,20 +390,17 @@ export class MainStreetScene extends Phaser.Scene {
 
 
     refreshPondStages() {
-        const game3Done = !!GameManager.loadOneGameResult(3)?.isFinished;
         const n3 = this.interactiveNpcs.find((n) => n.id === 3);
         const n6 = this.interactiveNpcs.find((n) => n.id === 6);
         if (!n3 || !n6) return;
 
-        n3.setVisible(!game3Done);
-        n6.setVisible(game3Done);
-        if (game3Done) {
-            n3.disableInteractive();
-            n6.setInteractive({ useHandCursor: true });
-        } else {
-            n6.disableInteractive();
-            n3.setInteractive({ useHandCursor: true });
-        }
+        // Level 6 art is the pond with the full railing. Keep that railing
+        // on screen from the start. Level 3 is played on the same pond
+        // until it is finished, then a click opens level 6.
+        n3.setVisible(false);
+        n3.disableInteractive();
+        n6.setVisible(true);
+        n6.setInteractive({ useHandCursor: true });
     }
 
     arePreviousGamesComplete(upToGame = 6) {
@@ -417,6 +414,12 @@ export class MainStreetScene extends Phaser.Scene {
 
     getNpcDialogue(npc) {
         const gameNumber = npc.id;
+        if (gameNumber === 6 && !GameManager.loadOneGameResult(3)?.isFinished) {
+            return {
+                bubbles: ['game3_npc_box_mainstreet'],
+                sceneKey: 'GameScene_3'
+            };
+        }
         if (gameNumber === 7) {
             if (this.arePreviousGamesComplete(6)) {
                 return {
